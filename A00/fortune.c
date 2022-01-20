@@ -1,5 +1,5 @@
 /***************************************************
- * hello.c
+ * fortune.c
  * Author: Aline Normoyle
  * Author: Keith Mburu
  * Print fortune
