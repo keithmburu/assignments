@@ -2,7 +2,7 @@
 #include <string.h>
 
 struct Snack {
-  char name[10];
+  char name[20];
   float cost;
   int quantity;
 }
@@ -22,6 +22,7 @@ int main() {
   struct Snack snacks[5];
   int options;
   int budget;
+  float fbudget;
   int choice;
 
   options = 0;
@@ -39,24 +40,25 @@ int main() {
 
   printf("Welcome to Steven Struct's Snack Bar.\n\nHow much money do you have? ");
   scanf("%d", &budget);
-
+  fbudget = (float)budget;
+  
   while (1) {
     printf("\n");
     for (int i = 0; i < options; i++) {
-      printf("%d) %-25s cost: $%-10g quantity: %d\n", i, snacks[i].name, snacks[i].cost, snacks[i].quantity);
+      printf("%d) %-20s cost: $%-10.2f quantity: %d\n", i, snacks[i].name, snacks[i].cost, snacks[i].quantity);
     }
     printf("\nWhat snack would you like to buy? [0, 1, 2] ");
     scanf("%d", &choice);
     
-    if (snacks[choice].cost > budget) {
-      printf("\nYou can't afford it!\n");
+    if (snacks[choice].cost > fbudget) {
+      printf("You can't afford it!\n");
     }
     else if (snacks[choice].quantity == 0) {
       printf("Sorry, we are out of %s\n", snacks[choice].name);
     }
     else {
-      budget -= snacks[choice].cost;
-      printf("\nYou bought %s\nYou have $%.2g left\n", snacks[choice].name, budget);
+      fbudget -= snacks[choice].cost;
+      printf("You bought %s\nYou have $%.2f left\n", snacks[choice].name, fbudget);
     }
   }
   return 0;
