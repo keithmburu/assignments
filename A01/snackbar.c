@@ -38,22 +38,26 @@ int main() {
   options++;
 
   printf("Welcome to Steven Struct's Snack Bar.\n\nHow much money do you have? ");
-  scanf("%d", budget);
+  scanf("%d", &budget);
 
-  for (int i = 0; i < options; i++) {
-    printf("%d) %-20s cost: $%-10f quantity %d", i, snacks[i].name, snacks[i].cost, snacks[i].quantity);
-  }
-  printf("\nWhat snack would you like to buy? [0, 1, 2] ");
-  scanf("%d", choice);
-  
-  if (snacks[choice].cost > budget) {
-    printf("\nYou can't afford it!");
-  }
-  if (snacks[choice].quantity == 0) {
-    printf("Sorry, we are out of %s", snacks[choice].name);
-  }
-  else {
-    printf("\nYou bought %s\nYou have %f left", snacks[choice].name, budget - snacks[choice].cost);
+  while (1) {
+    printf("\n");
+    for (int i = 0; i < options; i++) {
+      printf("%d) %-25s cost: $%-10g quantity: %d\n", i, snacks[i].name, snacks[i].cost, snacks[i].quantity);
+    }
+    printf("\nWhat snack would you like to buy? [0, 1, 2] ");
+    scanf("%d", &choice);
+    
+    if (snacks[choice].cost > budget) {
+      printf("\nYou can't afford it!\n");
+    }
+    else if (snacks[choice].quantity == 0) {
+      printf("Sorry, we are out of %s\n", snacks[choice].name);
+    }
+    else {
+      budget -= snacks[choice].cost;
+      printf("\nYou bought %s\nYou have $%.2g left\n", snacks[choice].name, budget);
+    }
   }
   return 0;
 }

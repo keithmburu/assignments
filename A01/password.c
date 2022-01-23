@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char* bad_password(char password[], int size) {
-  char badpassword[size];
+const char* bad_password(char password[], int size, char* badpassword[]) {
   for (int i = 0; i < size; i++) {
     switch(password[i]) {
       case 'e':
@@ -19,16 +18,15 @@ const char* bad_password(char password[], int size) {
         badpassword[i] = password[i];
     }
   }
-  return badpassword;
 }
 
 int main() {
   char password[10];
   char output[10];
-  const char* badpassword = NULL; 
+  char badpassword[10]; 
   printf("Enter a word: ");
-  scanf("%s", password);
-  badpassword = bad_password(password, strlen(password));
+  scanf("%s", &password);
+  bad_password(password, strlen(password), badpassword);
   for (int i = 0; i < strlen(password); i++) {
     printf("%d", i);
     output[i] = *(badpassword + 1);
