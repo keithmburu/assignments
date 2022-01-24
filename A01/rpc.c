@@ -5,6 +5,7 @@
 
 const char* ai_choice() {
   int aiChoice;
+  srand(time(0));
   do {
     aiChoice = rand() % 4;
   } while (aiChoice == 1);
@@ -18,7 +19,7 @@ const char* ai_choice() {
   }
 }
 
-const int* play(char move[], int* scores[]) {
+void play(char move[], int scores[]) {
   char aiMove[8];
   strcpy(aiMove, ai_choice());
   printf("AI chose %s", aiMove);
@@ -61,7 +62,6 @@ const int* play(char move[], int* scores[]) {
 }     
 
 int main() {
-  //srand(time(0));
   int rounds;
   char move[8];
   int scores[2];
