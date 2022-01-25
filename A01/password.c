@@ -2,24 +2,24 @@
 password.c
 Author: Keith Mburu
 1/28/2022
-Convert password to bad password
+Convert word to bad password
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define MAXLENGTH 10 // maximum password length
+#define MAXLENGTH 10 // maximum word length
 
 /* 
-Converts password given by the user to a bad password
-password: input from user
-size: length of password
+Converts word given by the user to a bad password
+word: input from user
+size: length of word
 badpassword: output to be constructed
 */
-void bad_password(char password[], int size, char badpassword[]) {
+void bad_password(char word[], int size, char badpassword[]) {
   for (int i = 0; i < size; i++) {
-    switch(password[i]) { 
+    switch(word[i]) { 
       case 'e': // replace
         badpassword[i] = '3';
         break;
@@ -30,18 +30,18 @@ void bad_password(char password[], int size, char badpassword[]) {
         badpassword[i] = '@';
         break;
       default:  // copy
-        badpassword[i] = password[i];
+        badpassword[i] = word[i];
     }
   }
   badpassword[size] = '\0'; // terminate string
 }
 
 int main() {
-  char password[MAXLENGTH];
+  char word[MAXLENGTH];
   char badpassword[MAXLENGTH]; 
   printf("Enter a word: ");
-  scanf("%s", &password); // polling for input
-  bad_password(password, strlen(password), badpassword); // constructing output
+  scanf("%s", &word); // polling for input
+  bad_password(word, strlen(word), badpassword); // constructing output
   printf("Your bad password is %s\n", badpassword);
   return 0;
 }
