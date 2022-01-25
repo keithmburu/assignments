@@ -1,13 +1,33 @@
+/* 
+snackbar.c
+Author: Keith Mburu
+1/28/2022
+Maintain list of snacks available for purchase
+*/
+
 #include <stdio.h>
 #include <string.h>
 
+#define MAXLENGTH 20 // maximum snack name length
+#define MAXNUMBER 5 // maximum number of snacks
+
+/*
+Struct with snack attributes
+*/
 struct Snack {
-  char name[20];
+  char name[MAXLENGTH];
   float cost;
   int quantity;
-}
+};
 
-snack_struct(char name[], float cost, int quantity) {
+/*
+Constructs the struct corresponding to each snack
+name: snack name
+cost: snack cost
+quantity: snack quantity
+returns: snack struct
+*/
+struct Snack snack_struct(char name[], float cost, int quantity) {
   struct Snack x;
   strcpy(x.name, name);
   x.cost = cost;
@@ -19,11 +39,11 @@ int main() {
   struct Snack CocoPuffs;
   struct Snack ManchegoCheese;
   struct Snack MagicBeans;
-  struct Snack snacks[5];
-  int options;
-  int budget;
-  float fbudget;
-  int choice;
+  struct Snack snacks[MAXNUMBER]; // array of structs
+  int options; // number of snacks available
+  int budget; 
+  float fbudget; // budget converted to float
+  int choice; // option chosen by buyer
 
   options = 0;
   CocoPuffs = snack_struct("Coco Puffs", 1.50, 4);
@@ -52,9 +72,11 @@ int main() {
     
     if (snacks[choice].cost > fbudget) {
       printf("You can't afford it!\n");
+      break;
     }
     else if (snacks[choice].quantity == 0) {
       printf("Sorry, we are out of %s\n", snacks[choice].name);
+      break;
     }
     else {
       fbudget -= snacks[choice].cost;
