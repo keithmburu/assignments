@@ -58,14 +58,16 @@ int main() {
   snacks[2] = MagicBeans;
   options++;
 
-  printf("Welcome to Steven Struct's Snack Bar.\n\nHow much money do you have? ");
+  printf("Welcome to Steven Struct's Snack Bar.\n\nHow much money do you have? "
+    );
   scanf("%d", &budget);
   fbudget = (float)budget;
   
   while (1) {
     printf("\n");
     for (int i = 0; i < options; i++) {
-      printf("%d) %-20s cost: $%-10.2f quantity: %d\n", i, snacks[i].name, snacks[i].cost, snacks[i].quantity);
+      printf("%d) %-20s cost: $%-10.2f quantity: %d\n", i, snacks[i].name, 
+        snacks[i].cost, snacks[i].quantity);
     }
     printf("\nWhat snack would you like to buy? [0, 1, 2] ");
     scanf("%d", &choice);
@@ -80,7 +82,9 @@ int main() {
     }
     else {
       fbudget -= snacks[choice].cost;
-      printf("You bought %s\nYou have $%.2f left\n", snacks[choice].name, fbudget);
+      snacks[choice].quantity -= 1;
+      printf("You bought %s\nYou have $%.2f left\n", snacks[choice].name, 
+        fbudget);
     }
   }
   return 0;
