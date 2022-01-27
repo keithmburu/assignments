@@ -40,7 +40,7 @@ int main() {
   char word[MAXLENGTH];
   char badpassword[MAXLENGTH]; 
   printf("Enter a word: ");
-  scanf("%s", &word); // polling for input
+  scanf("%s", word); // polling for input
   bad_password(word, strlen(word), badpassword); // constructing output
   printf("Your bad password is %s\n", badpassword);
   return 0;
