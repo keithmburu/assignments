@@ -44,7 +44,8 @@ aiBeats: move AI can beat
 winMessage: outcome where AI beats player
 lossMessage: outcome where AI is beaten by player
 */ 
-void ai_outcome(char aiMove[], char aiBeats[], char winMessage[], char lossMessage[]) {
+void ai_outcome(char aiMove[], char aiBeats[], char winMessage[], char 
+    lossMessage[]) {
   if (strcmp(aiMove, "rock") == 0) {
     strcpy(aiBeats, "scissors");
     strcpy(winMessage, "Rock bashes scissors");
@@ -75,10 +76,11 @@ void play(char move[], int* aiScore, int* playerScore) {
   strcpy(aiMove, ai_choice());
   printf("AI chose %s", aiMove);
   ai_outcome(aiMove, aiBeats, winMessage, lossMessage);
-  if (strcmp(move, "rock") != 0 && strcmp(move, "paper") != 0 && strcmp(move, "scissors") != 0) {
+  if (strcmp(move, "rock") != 0 && strcmp(move, "paper") != 0 && strcmp(move, 
+      "scissors") != 0) {
     printf("\nYou entered an invalid choice: %s", move);
   }
-  else if (strcmp(aiBeats, move) == 0) { // if player's move is one the AI can beat
+  else if (strcmp(aiBeats, move) == 0) { // if AI can beat player's move
     (*aiScore)++;
     printf("\n%s", winMessage);
   }
@@ -97,11 +99,12 @@ int main() {
   char move[MOVELENGTH];
   int aiScore = 0;
   int playerScore = 0;
-  printf("Welcome to Rock, Paper, Scissors!\nHow many rounds do you want to play? ");
+  printf("Welcome to Rock, Paper, Scissors!\nHow many rounds do you want to "
+    "play? ");
   scanf("%d", &rounds); 
   for (int i = 1; i <= rounds; i++) { 
     printf("Which do you choose? rock, paper, or scissors? ");
-    scanf("%s", &move);
+    scanf("%s", move);
     play(move, &aiScore, &playerScore); 
   }
   if (playerScore > aiScore) {
