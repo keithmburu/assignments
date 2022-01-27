@@ -67,7 +67,7 @@ Simulates one round of the game
 move: player's action
 scores: AI score and player score
 */
-void play(char move[], int scores[]) {
+void play(char move[], int* aiScore, int* playerScore) {
   char aiMove[MOVELENGTH];
   char aiBeats[MOVELENGTH];
   char winMessage[MESSAGELENGTH];
@@ -79,38 +79,35 @@ void play(char move[], int scores[]) {
     printf("\nYou entered an invalid choice: %s", move);
   }
   else if (strcmp(aiBeats, move) == 0) { // if player's move is one the AI can beat
-    scores[0]++;
+    (*aiScore)++;
     printf("\n%s", winMessage);
   }
   else if (strcmp(move, aiMove) == 0) {  // if both play the same move
     ;
   }
   else { 
-    scores[1]++;
+    (*playerScore)++;
     printf("\n%s", lossMessage);
   }
-  printf("\nAI score: %d, Player score: %d\n", scores[0], scores[1]);
+  printf("\nAI score: %d, Player score: %d\n", *aiScore, *playerScore);
 }     
 
 int main() {
   int rounds;
   char move[MOVELENGTH];
-  int scores[2];
   int aiScore = 0;
   int playerScore = 0;
   printf("Welcome to Rock, Paper, Scissors!\nHow many rounds do you want to play? ");
-  scanf("%d", &rounds);
-  scores[0] = aiScore; 
-  scores[1] = playerScore;  
+  scanf("%d", &rounds); 
   for (int i = 1; i <= rounds; i++) { 
     printf("Which do you choose? rock, paper, or scissors? ");
     scanf("%s", &move);
-    play(move, scores); 
+    play(move, &aiScore, &playerScore); 
   }
-  if (scores[1] > scores[0]) {
+  if (playerScore > aiScore) {
     printf("Player wins!\n");
   }
-  else if (scores[1] < scores[0]) {
+  else if (playerScore < aiScore) {
     printf("Player loses!\n");
   }
   else {
