@@ -1,22 +1,21 @@
 /*
- * Put your name and motto here
+ * Keith Mburu, Motto: Less is more
  */
-include <stdio.h>
+#include <stdio.h>
 
 int main() {
-printf("Hello vim")
-int a = 0
-scanf("Enter a number: ");
-if (a < 0) {
-  print("a less than zero");
-} else if (a > 0) {
-  print("a greater than zero");
-} else {
-  print(you win!)
+  printf("Hello vim\n");
+  int a = 0;
+  printf("Enter a number: ");  
+  scanf("%d", &a);
+  if (a < 0) {
+    printf("a less than zero\n");
+  } else if (a > 0) {
+    printf("a greater than zero\n");
+  } else {
+    printf("you win!\n");
+  }
 }
-  
-}
-}
 
 
 
@@ -85,4 +84,4 @@ if (a < 0) {
 
 
 
-kruft at the end of the file....
+
