@@ -1,11 +1,11 @@
 dynamic_snackbar : dynamic_snackbar.c
-	gcc dynamic_snackbar.c -o dynamic_snackbar
+	gcc -g dynamic_snackbar.c -o dynamic_snackbar
 
 repeat : repeat.c
-	gcc repeat.c -o repeat
+	gcc -g repeat.c -o repeat
 
 wordguess : wordguess.c
-	gcc wordguess.c -o wordguess
+	gcc -g wordguess.c -o wordguess
 
 all: dynamic_snackbar repeat wordguess
 	
