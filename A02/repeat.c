@@ -26,14 +26,15 @@ int main() {
   scanf("%s", word); 
   printf("Enter a count: ");
   scanf("%d", &count);
-  char* repeated = malloc(strlen(word) * count); // Allocating heap space for 
-                                                 // output
+  char* repeated = malloc((strlen(word) * count) + 1); // Allocating heap space 
+                                                       // for output
   if (repeated == NULL) { // Checking if malloc was successful
     printf("Cannot allocate new string. Exiting...\n");
     exit(1);
   } else {
       repeat(word, count, repeated);
       free(repeated); // Freeing allocated heap space
+      repeated = NULL;
   }
   return 0;
 }
