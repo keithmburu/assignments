@@ -1,8 +1,8 @@
 /* 
-snackbar.c
+dynamic_snackbar.c
 Author: Keith Mburu
 2/4/2022
-Maintain list of snacks available for purchase
+Constructs a list of snacks available for purchase
 */
 
 #include <stdio.h>
@@ -38,11 +38,10 @@ struct snack snack_struct(char name[], float cost, int quantity) {
 
 int main() {
   struct snack snacks[MAXNUMBER]; // array of structs
-  int adding;
+  int adding; // number of snacks being added
   char name[MAXLENGTH];
   float cost;
   int quantity;
-  int options = 0;
   
   printf("Enter a number of snacks: ");
   scanf("%d", &adding);
@@ -54,11 +53,10 @@ int main() {
     printf("Enter a quantity: ");
     scanf("%d", &quantity);
     snacks[i] = snack_struct(name, cost, quantity);
-    options++;
   }
   
   printf("\nWelcome to Dynamic Donna's Snack Bar.\n\n");
-  for (int i = 0; i < options; i++) {
+  for (int i = 0; i < adding; i++) {
     printf("%d) %-20s cost: $%-10.2f quantity: %d\n", i, snacks[i].name, 
       snacks[i].cost, snacks[i].quantity);
   }
