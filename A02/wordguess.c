@@ -18,7 +18,7 @@ Runs the game until the player wins
 void play(char* word, char* progress, char* complete) {
   char guess; // player's guess for one character
   int found; // check for guess correctness
-  for (int i = 1; i != 0; i++) {
+  for (int i = 1; i != 0; i++) { // runs until player wins
     found = 0;
     printf("Turn: %d\n\n", i);
     printf("%s", progress);
@@ -36,7 +36,7 @@ void play(char* word, char* progress, char* complete) {
     }
     else if (strcmp(complete, progress) == 0) { // compare progress to end goal
       printf("You won in %d turns!\n", i);
-      break;
+      break; // end loop
     }
   }
 }
