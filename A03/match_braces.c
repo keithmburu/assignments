@@ -6,6 +6,7 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct node {
   char sym;
@@ -13,6 +14,15 @@ struct node {
   int colnum;
   struct node* next;
 };
+
+struct node* structify(char sym, int line, int col, struct node* top) {
+  struct node* x = malloc(sizeof(struct node));
+  x->sym = sym;
+  x->linenum = line;
+  x->colnum = col;
+  x->next = top;
+  return x;
+}
 
 // Push a new node to a stack (implemented as a linked list). 
 // The new node should store the given symbol, line number, and column number
@@ -22,26 +32,83 @@ struct node {
 // Param top: the top node of the stack (NULL if empty)
 // Returns the new top of the stack
 struct node* push(char sym, int line, int col, struct node* top) {
-  return NULL;
+  top = structify(sym, line, col, top);
+  return top;
 }
 
 // Pop the top node from a stack (implemented as a linked list) and frees it
 // Param top: the top node of the current stack (NULL if empty)
 // Returns the new top of the stack
 struct node* pop(struct node* top) {
-  return NULL;
+  struct node* newTop = top->next;
+  free(top);
+  return newTop;
 }
 
 // Delete (e.g. free) all nodes in the given stack
 // Param top: the top node of the stack (NULL if empty)
 void clear(struct node* top) {
+  while (top != NULL) {
+    struct node* temp = top;
+    top = top->next;
+    free(temp);
+  }
 }
 
 // Print all nodes in the given stack (from top to bottom)
 // Param top: the top node of the stack (NULL if empty)
 void print(struct node* top) {
+  while (top != NULL) {
+    //printf("%c\n", top->sym);
+    top = top->next;
+  }
 }
 
 int main(int argc, char* argv[]) {
+  printf("argc: %d\n", argc);
+  if (argc != 2) {
+    char usage[32] = "";
+    for (int i = 0; i < argc; i++) {
+      strcat(usage, argv[i]);
+    }
+    printf("usage: %s\n", usage);
+    exit(1);
+  }
+  char filename[32] = "./";
+  strcat(filename, argv[1]);
+  FILE* file = fopen(filename, "r");
+  if (file == NULL) {
+     printf("Cannot open file: %s\n", argv[1]);
+     exit(2);
+  }
+  int linenum = 0;
+  int colnum = 0;
+  char sym;
+  struct node* symbols;
+  while (1) {
+    sym = fgetc(file);
+    if (sym == '\n') {
+      linenum++;
+      colnum = 0;
+    }
+    else {
+      colnum++;
+      if (sym == '{') {
+        symbols = push(sym, linenum, colnum, symbols);
+        printf("Stack:\n");
+        print(symbols);
+        printf("\n");
+      }
+      else if (sym == '}') {
+        int prevLineNum = symbols->linenum;
+        int prevColNum = symbols->colnum;
+        symbols = pop(symbols);
+        printf("Found matching braces: (%d, %d) -> (%d, %d)", prevLineNum, prevColNum, linenum, colnum);
+        printf("Stack:\n");
+        print(symbols);
+        printf("\n");
+      }
+    }
+  }
   return 0;
 }
