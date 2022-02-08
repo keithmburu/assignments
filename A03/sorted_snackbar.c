@@ -2,14 +2,13 @@
 // sorted_snackbar.c 
 // CS223 - Spring 2022
 // Ask the user for a list of snacks and store them in alphabetical order
-// Name:
+// Name: Keith Mburu
 //
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAXLENGTH 32 // maximum snack name length
-#define MAXNUMBER 10 // maximum number of snacks
 
 struct snack {
   char name[MAXLENGTH];
@@ -18,13 +17,11 @@ struct snack {
   struct snack* next;
 };
 
-/*
-Constructs the struct corresponding to each snack
-name: snack name
-cost: snack cost
-quantity: snack quantity
-returns: snack struct
-*/
+// Constructs the struct corresponding to each snack
+// name: snack name
+// cost: snack cost
+// quantity: snack quantity
+// returns: snack struct
 struct snack* structify(const char* name, float cost, int quantity){
   struct snack* x = malloc(sizeof(struct snack));
   strcpy(x->name, name);
@@ -112,7 +109,7 @@ int main() {
     i++;
     curr = curr->next;
   }
-
+  clear(snacks);
   return 0;
 }
 
