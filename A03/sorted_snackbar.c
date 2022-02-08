@@ -8,11 +8,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAXLENGTH 20 // maximum snack name length
+#define MAXLENGTH 32 // maximum snack name length
 #define MAXNUMBER 10 // maximum number of snacks
 
 struct snack {
-  char name[32];
+  char name[MAXLENGTH];
   float cost;
   int quantity;
   struct snack* next;
@@ -25,12 +25,12 @@ cost: snack cost
 quantity: snack quantity
 returns: snack struct
 */
-struct snack snack_struct(const char* name, float cost, int quantity) {
-  struct snack x;
-  strcpy(x.name, name);
-  x.cost = cost;
-  x.quantity = quantity;
-  x.next = NULL;
+struct snack* structify(const char* name, float cost, int quantity){
+  struct snack* x = malloc(sizeof(struct snack));
+  strcpy(x->name, name);
+  x->cost = cost;
+  x->quantity = quantity;
+  x->next = NULL;
   return x;
 }
 
@@ -43,28 +43,31 @@ struct snack snack_struct(const char* name, float cost, int quantity) {
 // Returns the first item in the list
 struct snack* insert_sorted(struct snack* snacks, 
     const char* name, float cost, int quantity) {
-  struct snack new = snack_struct(name, cost, quantity);
+  struct snack* new = structify(name, cost, quantity);
   if (snacks == NULL) {
-    snacks = &new;
+    snacks = new;
   }
   else {
     struct snack* curr = snacks;
     struct snack* prev = NULL;
-    int done = 0;
-    while (!done) {
-      if (new.name < curr->name) {
-        new.next = curr;
+    while (curr != NULL) {
+      if (strcmp(new->name, curr->name) < 0) {
+        new->next = curr;
         if (prev != NULL) {
-          prev->next = &new;
+          prev->next = new;
         }
         else {
-          snacks = &new;
+          snacks = new;
         }
-        done = 1;
+        break; // inserted snack
       }
       else {
-        curr = curr->next;
+        if (curr->next == NULL) {
+          curr->next = new;
+          break; // inserted snack at the end
+        }
         prev = curr;
+        curr = curr->next;
       }
     }
   }
@@ -74,7 +77,11 @@ struct snack* insert_sorted(struct snack* snacks,
 // Delete (e.g. free) all nodes in the given list of snacks
 // Param snacks: the first node in the list (NULL if empty)
 void clear(struct snack* snacks) {
-  snacks = NULL;
+  while (snacks != NULL) {
+    struct snack* temp = snacks;
+    snacks = snacks->next;
+    free(temp);
+  }
 }
 
 int main() {
@@ -94,13 +101,10 @@ int main() {
     printf("Enter a quantity: ");
     scanf("%d", &quantity);
     snacks = insert_sorted(snacks, name, cost, quantity);
-    printf("%s", snacks->name);
   }
   
-  printf("\nWelcome to Dynamic Donna's Snack Bar.\n\n");
+  printf("\nWelcome to Sorted Sally's Snack Bar.\n\n");
   struct snack* curr = snacks;
-  printf("naem: %s", snacks->name);
-  exit(1);
   int i = 0;
   while (curr != NULL) {
     printf("%d) %-20s cost: $%-10.2f quantity: %d\n", i, curr->name, 
