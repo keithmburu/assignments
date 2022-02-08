@@ -49,6 +49,7 @@ struct node* push(char sym, int line, int col, struct node* top) {
 struct node* pop(struct node* top) {
   struct node* newTop = top->next;
   free(top);
+  top = NULL;
   return newTop;
 }
 
@@ -59,6 +60,7 @@ void clear(struct node* top) {
     struct node* temp = top;
     top = top->next;
     free(temp);
+    temp = NULL;
   }
 }
 
