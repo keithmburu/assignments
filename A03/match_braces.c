@@ -2,7 +2,7 @@
 // match_braces.c 
 // CS223 - Spring 2022
 // Identify matched braces from a given file
-// Name:
+// Name: Keith Mburu
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +15,13 @@ struct node {
   struct node* next;
 };
 
+// Initialize a pointer to a new struct node, which itself points to the top 
+//  node of the stack
+// Param sym: a character symbol corresponding to the new node
+// Param line: the line number of the symbol
+// Param line: the column number of the symbol
+// Param top: the top node of the stack
+// Returns the new node's address
 struct node* structify(char sym, int line, int col, struct node* top) {
   struct node* x = malloc(sizeof(struct node));
   x->sym = sym;
@@ -64,6 +71,12 @@ void print(struct node* top) {
   }
 }
 
+// Find matching braces and unmatched braces
+// Param sym: a character symbol from the file
+// Param line: the line number of the symbol
+// Param line: the column number of the symbol
+// Param symbols: the address of the top node of the stack
+// Param file: the program whose braces are being checked
 void run(char sym, int linenum, int colnum, struct node* symbols, FILE* file) {
   while ((sym = fgetc(file)) != EOF) {
     if (sym == '\n') {
@@ -74,41 +87,32 @@ void run(char sym, int linenum, int colnum, struct node* symbols, FILE* file) {
       colnum++;
       if (sym == '{') {
         symbols = push(sym, linenum, colnum, symbols);
-        printf("Stack after push:\n");
-        print(symbols);
-        printf("\n");
       }
       else if (sym == '}') {
         if (symbols == NULL) {
            printf("Unmatched brace on Line %d and Column %d\n", linenum, colnum);
-           continue;
         }
-        if ((symbols->sym) != '{') {
-           printf("Unmatched brace on Line %d and Column %d\n", linenum, colnum);
-           symbols = pop(symbols);
-           continue;
+        else {
+          printf("Found matching braces: (%d, %d) -> (%d, %d)\n", 
+            symbols->linenum, symbols->colnum, linenum, colnum);
+          symbols = pop(symbols);
         }
-        printf("Found matching braces: (%d, %d) -> (%d, %d)\n", 
-          symbols->linenum, symbols->colnum, linenum, colnum);
-        symbols = pop(symbols);
-        printf("Stack after pop:\n");
-        print(symbols);
-        printf("\n");
       }
     } 
   }
-  if (symbols != NULL) {
+  while (symbols != NULL) {
     printf("Unmatched brace on Line %d and Column %d\n", symbols->linenum, 
       symbols->colnum);
+    symbols = pop(symbols);
   }
 }
 
 int main(int argc, char* argv[]) {
-  printf("argc: %d\n", argc);
   if (argc != 2) {
     char usage[32] = "";
     for (int i = 0; i < argc; i++) {
       strcat(usage, argv[i]);
+      strcat(usage, " ");
     }
     printf("usage: %s\n", usage);
     exit(1);
@@ -126,8 +130,7 @@ int main(int argc, char* argv[]) {
   struct node* symbols = NULL;
 
   run(sym, linenum, colnum, symbols, file);
-
   clear(symbols);
- 
+  fclose(file);
   return 0;
 }
