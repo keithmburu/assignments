@@ -59,8 +59,47 @@ void clear(struct node* top) {
 // Param top: the top node of the stack (NULL if empty)
 void print(struct node* top) {
   while (top != NULL) {
-    //printf("%c\n", top->sym);
+    printf("%c\n", top->sym);
     top = top->next;
+  }
+}
+
+void run(char sym, int linenum, int colnum, struct node* symbols, FILE* file) {
+  while ((sym = fgetc(file)) != EOF) {
+    if (sym == '\n') {
+      linenum++;
+      colnum = 0;
+    }
+    else {
+      colnum++;
+      if (sym == '{') {
+        symbols = push(sym, linenum, colnum, symbols);
+        printf("Stack after push:\n");
+        print(symbols);
+        printf("\n");
+      }
+      else if (sym == '}') {
+        if (symbols == NULL) {
+           printf("Unmatched brace on Line %d and Column %d\n", linenum, colnum);
+           continue;
+        }
+        if ((symbols->sym) != '{') {
+           printf("Unmatched brace on Line %d and Column %d\n", linenum, colnum);
+           symbols = pop(symbols);
+           continue;
+        }
+        printf("Found matching braces: (%d, %d) -> (%d, %d)\n", 
+          symbols->linenum, symbols->colnum, linenum, colnum);
+        symbols = pop(symbols);
+        printf("Stack after pop:\n");
+        print(symbols);
+        printf("\n");
+      }
+    } 
+  }
+  if (symbols != NULL) {
+    printf("Unmatched brace on Line %d and Column %d\n", symbols->linenum, 
+      symbols->colnum);
   }
 }
 
@@ -81,34 +120,14 @@ int main(int argc, char* argv[]) {
      printf("Cannot open file: %s\n", argv[1]);
      exit(2);
   }
-  int linenum = 0;
+  int linenum = 1;
   int colnum = 0;
-  char sym;
-  struct node* symbols;
-  while (1) {
-    sym = fgetc(file);
-    if (sym == '\n') {
-      linenum++;
-      colnum = 0;
-    }
-    else {
-      colnum++;
-      if (sym == '{') {
-        symbols = push(sym, linenum, colnum, symbols);
-        printf("Stack:\n");
-        print(symbols);
-        printf("\n");
-      }
-      else if (sym == '}') {
-        int prevLineNum = symbols->linenum;
-        int prevColNum = symbols->colnum;
-        symbols = pop(symbols);
-        printf("Found matching braces: (%d, %d) -> (%d, %d)", prevLineNum, prevColNum, linenum, colnum);
-        printf("Stack:\n");
-        print(symbols);
-        printf("\n");
-      }
-    }
-  }
+  char sym; 
+  struct node* symbols = NULL;
+
+  run(sym, linenum, colnum, symbols, file);
+
+  clear(symbols);
+ 
   return 0;
 }
