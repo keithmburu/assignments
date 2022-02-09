@@ -92,7 +92,8 @@ void run(char sym, int linenum, int colnum, struct node* symbols, FILE* file) {
       }
       else if (sym == '}') {
         if (symbols == NULL) {
-           printf("Unmatched brace on Line %d and Column %d\n", linenum, colnum);
+           printf("Unmatched brace on Line %d and Column %d\n", linenum, 
+            colnum);
         }
         else {
           printf("Found matching braces: (%d, %d) -> (%d, %d)\n", 
