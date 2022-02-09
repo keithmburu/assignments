@@ -2,11 +2,14 @@
 // magic_square.c 
 // CS223 - Spring 2022
 // Identify whether a matrix is a magic square
-// Name:
+// Name: Keith Mburu
 //
 #include <stdio.h>
 #include <stdlib.h>
 
+// Free allocated heap space and set pointers to NULL
+// Param matrix: 2D array to be freed
+// Param nrows: number of rows in the matrix
 void clear(int** matrix, int nrows) {
   for (int i=0; i < nrows; i++) {
     free(matrix[i]);
@@ -16,7 +19,14 @@ void clear(int** matrix, int nrows) {
   matrix = NULL;
 }
 
-void check_rows_cols(int dim1, int dim2, int** matrix, int* checksum, int* failed) {
+// Check if column or row sums match checksum
+// Param dim1: nrows or ncols depending on sums being checked
+// Param dim2: nrows or ncols depending on sums being checked
+// Param matrix: 2D array being whose sums are being checked
+// Param checksum: magic constant
+// Param failed: boolean indicating a sum doesn't match checksum
+void check_rows_cols(int dim1, int dim2, int** matrix, int* checksum, 
+    int* failed) {
   for (int i=0; i < dim1; i++) {
     int sum = 0;
     for (int j=0; j < dim2; j++) {
@@ -31,6 +41,12 @@ void check_rows_cols(int dim1, int dim2, int** matrix, int* checksum, int* faile
   }
 }
 
+// Check if diagonal sums match checksum
+// Param nrows: number of rows in the matrix
+// Param ncols: number of columns in the matrix
+// Param matrix: 2D array being whose sums are being checked
+// Param checksum: magic constant
+// Param failed: boolean indicating a sum doesn't match checksum
 void check_diags(int nrows, int ncols, int** matrix, int checksum, int* failed) {
   int lsum = 0;
   int rsum = 0;
@@ -58,10 +74,6 @@ void main() {
       int value;
       scanf(" %d", &value);
       matrix[i][j] = value;
-    }
-  }
-  for (int i=0; i < nrows; i++) {
-    for (int j=0; j < ncols; j++) {
       printf("%d ", matrix[i][j]);
     }
     printf("\n");
