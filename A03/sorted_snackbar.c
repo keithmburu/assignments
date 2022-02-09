@@ -48,7 +48,7 @@ struct snack* insert_sorted(struct snack* snacks,
     struct snack* curr = snacks;
     struct snack* prev = NULL;
     while (curr != NULL) {
-      if (strcmp(new->name, curr->name) < 0) {
+      if (strcmp(new->name, curr->name) < 0) { // check alphabetical order
         new->next = curr;
         if (prev != NULL) {
           prev->next = new;
@@ -56,12 +56,12 @@ struct snack* insert_sorted(struct snack* snacks,
         else {
           snacks = new;
         }
-        break; // inserted snack
+        break; // inserted snack in the middle of the list
       }
       else {
         if (curr->next == NULL) {
           curr->next = new;
-          break; // inserted snack at the end
+          break; // inserted snack at the end of the list
         }
         prev = curr;
         curr = curr->next;
