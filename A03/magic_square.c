@@ -62,7 +62,7 @@ void check_diags(int nrows, int ncols, int** matrix, int checksum, int* failed) 
   }
 }
 
-void main() {
+int main(int argc, char* argv[]) {
   int nrows;
   int ncols;
   scanf(" %d", &nrows);
@@ -87,5 +87,6 @@ void main() {
   if (!failed) printf("M is a magic square (magic constant = %d)\n", checksum);
   
   clear(matrix, nrows);
+  return 0;
 }
 
