@@ -37,7 +37,6 @@ struct snack snack_struct(char name[], float cost, int quantity) {
 }
 
 int main() {
-  struct snack snacks[MAXNUMBER]; // array of structs
   int adding; // number of snacks being added
   char name[MAXLENGTH];
   float cost;
@@ -45,6 +44,9 @@ int main() {
   
   printf("Enter a number of snacks: ");
   scanf("%d", &adding);
+
+  struct snack* snacks = malloc(sizeof(struct snack)*adding);// array of structs
+  
   for (int i = 0; i < adding; i++) {
     printf("Enter a name: ");
     scanf("%s", name);
