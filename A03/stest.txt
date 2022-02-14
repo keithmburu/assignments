@@ -1,0 +1,6 @@
+5 
+Carrots 2.00 10 
+Beans 5.00 1
+Slurm 1.50 3
+Apples 0.5 0
+Taters 3 5
