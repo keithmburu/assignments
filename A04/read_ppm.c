@@ -10,52 +10,51 @@
 // array of arrays
 struct ppm_pixel** read_ppm(const char* filename, int* w, int* h) {
   FILE* file = fopen(filename, "r");
-  int nlines = 1000;
   if (file == NULL) {
     printf("Cannot open file: %s\n", filename);
     return NULL;
   }
   char* buffer = malloc(sizeof(char) * BUFFERSIZE);
   memset(buffer, '\0', BUFFERSIZE);
+  
   struct ppm_pixel** raster = NULL;
-  for (int n=0; n<nlines; n++) {
-    fgets(buffer, BUFFERSIZE, file);
-    printf("%d %s\n", n, buffer);
-    if (n == 1) {
-      sscanf(buffer, " %d %d ", w, h);
-      nlines = *h+3;
-      raster = malloc(sizeof(struct ppm_pixel*)* *h);
-      for (int i=0; i < *h; i++) {
-        raster[i] = malloc(sizeof(struct ppm_pixel)* *w);
-      }
-      if (raster == NULL) {
-        fclose(file);
-        return NULL;
-      }
+  
+  fgets(buffer, BUFFERSIZE, file);
+  printf("%s\n", buffer);
+  memset(buffer, '\0', BUFFERSIZE);
+  
+  fgets(buffer, BUFFERSIZE, file);
+  if (buffer[0] == '#') {
+    fgets(buffer, BUFFERSIZE, file);   
+  }
+  printf("%s\n", buffer);
+  sscanf(buffer, " %d %d ", w, h);
+  raster = malloc(sizeof(struct ppm_pixel*)* *h);
+  for (int i=0; i < *h; i++) {
+    raster[i] = malloc(sizeof(struct ppm_pixel)* *w);
+  }
+  if (raster == NULL) {
+    fclose(file);
+    return NULL;
+  }
+  memset(buffer, '\0', BUFFERSIZE);
+  
+  fgets(buffer, BUFFERSIZE, file);
+  printf("%s\n", buffer);
+  int maxval;
+  sscanf(buffer, " %d ", &maxval);
+
+  for (int i=0; i < *h; i++) {
+    for (int j=0; j < *w; j++) { 
+      unsigned char r;
+      unsigned char g;
+      unsigned char b;
+      fscanf(file, " %hhu %hhu %hhu", &r, &g, &b);
+      struct ppm_pixel newpixel= {r, g, b};
+      raster[i][j] = newpixel;
+      printf("raster[i][j]: %hhu %hhu %hhu\n", raster[i][j].red, raster[i][j].green, raster[i][j].blue);
     }
-    else if (n == 2) {
-       int maxval;
-       sscanf(buffer, " %d ", &maxval);
-    }
-    else if (n >= 3) {
-      printf("\nline %d\n", n);
-      int progress = 0;
-      for (int j=0; j < *w; j++) { 
-        unsigned char r;
-        unsigned char g;
-        unsigned char b;
-        fscanf(file, " %hhu %hhu %hhu ", &r, &g, &b);
-        char lastread[32];
-        sscanf(buffer+progress, " %hhu %hhu %hhu ", &r, &g, &b);                
-        sprintf(lastread, "%hhu %hhu %hhu", r, g, b);
-        progress += strlen(lastread)+5;
-        struct ppm_pixel newpixel= {r, g, b};
-        raster[n-3][j] = newpixel;
-        printf("raster[i][j]: %hhu %hhu %hhu\n", raster[n-3][j].red, raster[n-3][j].green, raster[n-3][j].blue);
-      }
-    }
-    memset(buffer, '\0', BUFFERSIZE);
-  }    
+  }      
   fclose(file);
   return raster;
 }

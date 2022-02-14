@@ -3,12 +3,13 @@
 #include <stdlib.h>
 
 int main() {
-
-  // todo: call read_ppm
   struct ppm_pixel** raster = NULL;
   int width;
   int height;
   raster = read_ppm("./feep-ascii.ppm", &width, &height);
+  if (raster == NULL) {
+    exit(1);
+  }
   printf("Testing file feep-ascii.ppm: %d %d\n", width, height);
   for (int i=0; i<height; i++) {
     for (int j=0; j<width; j++) {
