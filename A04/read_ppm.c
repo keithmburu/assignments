@@ -5,9 +5,8 @@
 
 #define BUFFERSIZE 1024
 
-// TODO: Implement this function
-// Feel free to change the function signature if you prefer to implement an 
-// array of arrays
+
+// 
 struct ppm_pixel** read_ppm(const char* filename, int* w, int* h) {
   FILE* file = fopen(filename, "r");
   if (file == NULL) {
@@ -52,9 +51,9 @@ struct ppm_pixel** read_ppm(const char* filename, int* w, int* h) {
       fscanf(file, " %hhu %hhu %hhu", &r, &g, &b);
       struct ppm_pixel newpixel= {r, g, b};
       raster[i][j] = newpixel;
-      printf("raster[i][j]: %hhu %hhu %hhu\n", raster[i][j].red, raster[i][j].green, raster[i][j].blue);
     }
-  }      
+  }
+  free(buffer);      
   fclose(file);
   return raster;
 }
