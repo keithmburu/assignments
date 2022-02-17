@@ -48,7 +48,8 @@ void print_image(struct ppm_pixel** raster, int width, int height) {
       }
       printf("%c", symbol);
     }
-  printf("\n");
+    free(raster[i]); 
+    printf("\n");
   }  
 }
 
@@ -62,16 +63,15 @@ int main(int argc, char** argv) {
     printf("usage: %s\n", usage);
     exit(1);
   }
-  char filename[32] = "./";
-  strcat(filename, argv[1]);
 
   int width;
   int height;
-  struct ppm_pixel** raster = read_ppm(filename, &width, &height); // matrix
+  struct ppm_pixel** raster = read_ppm(argv[1], &width, &height); // matrix
 
-  printf("Reading %s.ppm with width %d and height %d\n", filename, width, 
+  printf("Reading %s with width %d and height %d\n", argv[1], width, 
     height);
   print_image(raster, width, height);
+  free(raster);
   return 0;
 }
 

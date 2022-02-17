@@ -33,8 +33,8 @@ struct ppm_pixel** read_ppm(const char* filename, int* w, int* h) {
   
   fgets(buffer, BUFFERSIZE, file); // comment or width, height
   if (buffer[0] == '#') {
-    memset(buffer, '\0', BUFFERSIZE);
     printf("%s\n", buffer); 
+    memset(buffer, '\0', BUFFERSIZE);
     fgets(buffer, BUFFERSIZE, file);   
   }
   printf("%s\n", buffer);
@@ -69,8 +69,8 @@ struct ppm_pixel** read_ppm(const char* filename, int* w, int* h) {
       raster[i][j] = newpixel;
     }
   }
-  free(buffer);      
-  fclose(file);
+  //free(buffer);      
+  //fclose(file);
   return raster;
 }
 
