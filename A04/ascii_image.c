@@ -49,6 +49,7 @@ void print_image(struct ppm_pixel** raster, int width, int height) {
       printf("%c", symbol);
     }
     free(raster[i]); 
+    raster[i] = NULL;
     printf("\n");
   }  
 }
@@ -72,6 +73,7 @@ int main(int argc, char** argv) {
     height);
   print_image(raster, width, height);
   free(raster);
+  raster = NULL;
   return 0;
 }
 

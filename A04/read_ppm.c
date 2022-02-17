@@ -9,7 +9,7 @@ Reads in a ppm file and formats the contents as a matrix of pixels
 #include <string.h>
 #include "read_ppm.h"
 
-#define BUFFERSIZE 64
+#define BUFFERSIZE 1024
 
 /*
 Reads in a ppm file and formats the contents as a matrix of pixels
@@ -28,16 +28,16 @@ struct ppm_pixel** read_ppm(const char* filename, int* w, int* h) {
   memset(buffer, '\0', BUFFERSIZE);
    
   fgets(buffer, BUFFERSIZE, file); // "magic number"
-  printf("%s\n", buffer); 
+  //printf("%s\n", buffer); 
   memset(buffer, '\0', BUFFERSIZE);
   
   fgets(buffer, BUFFERSIZE, file); // comment or width, height
   if (buffer[0] == '#') {
-    printf("%s\n", buffer); 
+    //printf("%s\n", buffer); 
     memset(buffer, '\0', BUFFERSIZE);
     fgets(buffer, BUFFERSIZE, file);   
   }
-  printf("%s\n", buffer);
+  //printf("%s\n", buffer);
   sscanf(buffer, " %d %d ", w, h);
   struct ppm_pixel** raster = malloc(sizeof(struct ppm_pixel*)* *h); // matrix
   if (raster == NULL) {
@@ -56,7 +56,7 @@ struct ppm_pixel** read_ppm(const char* filename, int* w, int* h) {
   memset(buffer, '\0', BUFFERSIZE);
   
   fgets(buffer, BUFFERSIZE, file); // maxval
-  printf("%s\n", buffer);
+  //printf("%s\n", buffer);
   memset(buffer, '\0', BUFFERSIZE);
 
   for (int i=0; i < *h; i++) { // pixels
@@ -69,8 +69,9 @@ struct ppm_pixel** read_ppm(const char* filename, int* w, int* h) {
       raster[i][j] = newpixel;
     }
   }
-  //free(buffer);      
-  //fclose(file);
+  free(buffer);
+  buffer = NULL;      
+  fclose(file);
   return raster;
 }
 

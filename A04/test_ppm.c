@@ -21,9 +21,11 @@ int main() {
         raster[i][j].blue);
     }
     free(raster[i]);
+    raster[i] = NULL;
     printf("\n");
   }
   free(raster);
+  raster = NULL;
   return 0;
 }
 
