@@ -1,12 +1,29 @@
-#include <stdio.h>
-#include "read_ppm.h"
+/*
+test_ppm.c
+Author: Keith Mburu
+2/18/2022
+Tests read_ppm function
+*/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include "read_ppm.h"
 int main(int argc, char** argv) {
   int w, h;
   char* filename = "feep-raw.ppm";
-  struct ppm_pixel* pixels = read_ppm(filename, &w, &h);
-  printf("Testing file %s: %d %d\n", filename, w, h); 
-
+  struct ppm_pixel** raster = read_ppm(filename, &w, &h);
+  printf("Testing file %s: %d %d\n", filename, w, h);
+  for (int i=0; i<h; i++) {
+    for (int j=0; j<w; j++) {
+      printf("(%hhu,%hhu,%hhu) ", raster[i][j].red, raster[i][j].green, 
+        raster[i][j].blue);
+    }
+    free(raster[i]);
+    raster[i] = NULL;
+    printf("\n");
+  }
+  free(raster);
+  raster = NULL;
   return 0;
 }
 
