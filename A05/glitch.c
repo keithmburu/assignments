@@ -9,7 +9,16 @@ Creates a "glitched" version of an image
 #include <string.h>
 #include "read_ppm.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) { 
+  if (argc != 2) {
+    char usage[32] = "";
+    for (int i = 0; i < argc; i++) {
+      strcat(usage, argv[i]);
+      strcat(usage, " ");
+    }
+    printf("usage: %s\n", usage);
+    exit(1);
+  }
   char* filename = argv[1];
   int w, h;
   struct ppm_pixel* raster = read_ppm(filename, &w, &h);
@@ -32,5 +41,7 @@ int main(int argc, char** argv) {
 
   //outputting glitched image to file
   write_ppm(filename, raster, w, h);
+
+  free(raster);
   return 0;
 }

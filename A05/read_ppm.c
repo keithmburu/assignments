@@ -77,9 +77,12 @@ void write_ppm(const char* filename, struct ppm_pixel* pxs, int w, int h) {
     exit(1);
   }
 
-  char* outfilename = malloc(sizeof(char)*(strlen(filename)+7));
+  char* outfilename = malloc(sizeof(char)*(strlen(filename)+8));
   for (int i=0; ((i < strlen(filename)) && (filename[i] != '.')); i++) {
     outfilename[i] = filename[i];
+    if (filename[i+1] == '.') {
+      outfilename[i+1] = '\0';
+    }
   }
   strcat(outfilename, "-glitch.ppm");
 
@@ -115,9 +118,11 @@ void write_ppm(const char* filename, struct ppm_pixel* pxs, int w, int h) {
   }
 
   free(buffer);
+  free(outfilename);
   fclose(infile);
   fclose(outfile);  
   buffer = NULL;
   infile = NULL;
   outfile = NULL;   
+  outfilename = NULL;
 }
