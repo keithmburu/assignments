@@ -1,3 +1,9 @@
+/*
+word.c
+Author: Keith Mburu
+2/25/2022
+Converts 4-letter word to its integer representation
+*/
 #include <stdio.h>
 
 int main() {
