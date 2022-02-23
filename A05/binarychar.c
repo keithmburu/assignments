@@ -15,7 +15,7 @@ returns result of exponentiation
 int power(int base, int exp) {
   int result = 1;
   for (int i=0; i < exp; i++) {
-    printf("%d\n", result);
+    //printf("%d\n", result);
     result *= base;
   }
   return result;
