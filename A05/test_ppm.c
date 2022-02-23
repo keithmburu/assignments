@@ -11,15 +11,15 @@ Tests read_ppm function
 
 int main(int argc, char** argv) {
   int w, h;
-  char* filename = "monalisa.ppm";
+  char* filename = "feep-raw.ppm";
   struct ppm_pixel* raster = read_ppm(filename, &w, &h);
   printf("Testing file %s: %d %d\n", filename, w, h);
 
   //printing pixel values
   for (int i=0; i<h; i++) {
     for (int j=0; j<w; j++) {
-      printf("(%hhu,%hhu,%hhu) ", raster[i+j].red, raster[i+j].green,
-        raster[i+j].blue);
+      printf("(%hhu,%hhu,%hhu) ", raster[i*w+j].red, raster[i*w+j].green,
+        raster[i*w+j].blue);
     }
     printf("\n");
   }

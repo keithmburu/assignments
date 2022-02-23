@@ -43,6 +43,7 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
   int size = sizeof(struct ppm_pixel) * *w * *h;
   struct ppm_pixel* raster = malloc(size); // matrix
   if (raster == NULL) {
+    printf("Could not create raster\n");
     free(buffer);
     fclose(file);
     return NULL;
