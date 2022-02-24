@@ -5,8 +5,16 @@
 // The size of the vector should be stored in the parameter size
 // The values should be returned in a flat float array
 float* readvector(const char* filename, int *size) {
-  // todo: implement me
-  return NULL;
+  FILE* file = fopen(filename, "r");
+  fscanf(file, "%d ", size);
+  float* result = malloc(sizeof(float) * *size);
+  for (int i=0; i < *size; i++) {
+    float x;
+    fscanf(file, " %f", &x);
+    result[i] = x; 
+  }
+  fclose(file);
+  return result;
 }
 
 int main(int argc, char** argv) {
@@ -19,7 +27,9 @@ int main(int argc, char** argv) {
   float* vector = readvector(argv[1], &size);
 
   // todo: print vector values
-
+  for (int i=0; i < size; i++) {
+    printf("%f\n", vector[i]);
+  }
   free(vector);
   return 0;
 }
