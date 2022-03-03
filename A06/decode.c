@@ -1,8 +1,20 @@
+/*
+decode.c
+Author: Keith Mburu
+3/4/2022
+Decodes image to get message
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "read_ppm.h"
 
+/*
+Raises a base to an exponent
+base: number to be raised
+exponent: number to be raised to
+returns result of exponentiaton
+*/
 unsigned int power(unsigned int base, int exp) {
   unsigned int result = 1;
   for (int i=0; i < exp; i++) {
@@ -11,6 +23,11 @@ unsigned int power(unsigned int base, int exp) {
   return result;
 }
 
+/*
+Converts binary string to its ASCII representation
+bin: binary string
+returns ASCII character
+*/
 char bin_to_char(char* bin) {
   int character = 0;
   for (int i=0; i < 8; i++) {
@@ -21,7 +38,16 @@ char bin_to_char(char* bin) {
   return character;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) { 
+  if (argc != 2) {
+    char usage[32] = "";
+    for (int i = 0; i < argc; i++) {
+      strcat(usage, argv[i]);
+      strcat(usage, " ");
+    }
+    printf("usage: %s\n", usage);
+    exit(1);
+  }
   char* filename = argv[1];
   int w, h;
   struct ppm_pixel* raster = read_ppm(filename, &w, &h);
@@ -33,43 +59,55 @@ int main(int argc, char** argv) {
   int max = (w * h * 3)/8;
   printf("Max number of characters in the image: %d\n", max);
 
-  char* encoded = malloc((sizeof(char)*(max+1)*8));  
-  memset(encoded, '\0', ((sizeof(char)*(max+1)*8)));
-  unsigned int mask = 0b00000001;
+  char* message = malloc(sizeof(char)*(max+1));
+  memset(message, '\0', sizeof(char)*(max+1));
+
+  int index = 0;
+  unsigned int mask = 0x00000001;
+  char bin[9];
+  bin[8] = '\0';
+  char decoded;
   for (int i=0; i<h; i++) {
     for (int j=0; j<w; j++) {
       for (int k=0; k < 3; k++) {
-        char bit;
-        if ((raster[i*w+j].colors[k] & mask) == 0b00000001) {
-          bit = '1';
+        // last bit is 1
+        if ((raster[i*w+j].colors[k] & mask) == 0x00000001) {
+          bin[index % 8] = '1';
         }
+        // last bit is 0
         else {
-          bit = '0';
+          bin[index % 8] = '0';
         }
-        encoded[(i*w*3)+(j*3)+k] = bit;
+        // size of ASCII character
+        if ((index % 8) == 7) {
+          decoded = bin_to_char(bin);
+          //printf("bin: %s, decoded: %c\n", bin, decoded);
+          // end of message or file
+          if (decoded == '\0' || index == (max*8)-1) {
+            if (index == (max*8)-1) {
+              message[((index+1)/8)-1] = decoded;
+            }
+            //if (decoded == '\0') {
+              //printf("\nNull char found\n");
+            //}
+            printf("%s\n", message);
+            free(message);
+            message = NULL; 
+            free(raster);
+            raster = NULL;
+            exit(1); //done
+          }
+          // append character to message
+          else {
+            message[((index+1)/8)-1] = decoded;
+            //printf("message: %s\n", message); 
+          }
+          //printf("bin: %s, char: %c, message: %s\n", bin, bin_to_char(bin), message);  
+        }
+        index++;
       }
     }
   }
-  free(raster);
-  raster = NULL;
-
-  //printf("encoded: %s\n", encoded)
-
-  char* message = malloc(max);
-  memset(message, '\0', max);
-  char bin[8] = "00000000";
-  for (int i=0; i < strlen(encoded); i++) {
-    bin[i % 8] = encoded[i];
-    //printf("i: %d, encoded[i]: %c, bin: %s\n", i, encoded[i], bin);
-    if (((i+1) % 8) == 0) {
-      message[((i+1)/8)-1] = bin_to_char(bin);
-      //printf("bin: %s, char: %c, message: %s\n", bin, bin_to_char(bin), message);
-      memset(bin, '0', 8);
-    }
-  }
-  printf("%s", message);
-
-  free(encoded);
-  //free(message);
+  
   return 0;
 }
