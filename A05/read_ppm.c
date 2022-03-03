@@ -59,7 +59,7 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
 
 /*
 Writes a matrix of pixels to a ppm file
-filename: name of file to be read in
+filename: name of file to be written to
 pxs: matrix of pixels to be written
 w: width of correponding image
 h: height of corresponding image
