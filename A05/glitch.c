@@ -40,8 +40,19 @@ int main(int argc, char** argv) {
   }
 
   //outputting glitched image to file
-  write_ppm(filename, raster, w, h);
+  char* outfilename = malloc(sizeof(char)*(strlen(filename)+10));
+  for (int i=0; ((i < strlen(filename)) && (filename[i] != '.')); i++) {
+    outfilename[i] = filename[i];
+    if (filename[i+1] == '.') {
+      outfilename[i+1] = '\0';
+    }
+  }
+  strcat(outfilename, "-glitch.ppm");
+  write_ppm(outfilename, raster, w, h);
 
+  free(outfilename);
+  outfilename = NULL;
   free(raster);
+  raster = NULL;
   return 0;
 }

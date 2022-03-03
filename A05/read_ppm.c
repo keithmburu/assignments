@@ -24,41 +24,36 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
     printf("Cannot open file: %s\n", filename);
     return NULL;
   }
-  char* buffer = malloc(sizeof(char) * BUFFERSIZE);
-  memset(buffer, '\0', BUFFERSIZE);
-   
-  fgets(buffer, BUFFERSIZE, file); // "magic number"
-  //printf("%s\n", buffer); 
-  memset(buffer, '\0', BUFFERSIZE);
   
-  fgets(buffer, BUFFERSIZE, file); // comment or width, height
-  if (buffer[0] == '#') {
-    //printf("%s\n", buffer); 
+  // header lines
+  char* buffer = malloc(sizeof(char) * BUFFERSIZE);
+  int headerlines = 3;
+  while (headerlines > 0) {
+    fgets(buffer, BUFFERSIZE, file);
+    if (headerlines == 2) {
+      sscanf(buffer, " %d %d ", w, h);
+    }
+    if (buffer[0] != '#') {
+      headerlines -= 1;
+    }
     memset(buffer, '\0', BUFFERSIZE);
-    fgets(buffer, BUFFERSIZE, file);   
   }
-  //printf("%s\n", buffer);
-  sscanf(buffer, " %d %d ", w, h);
 
+  free(buffer);
+  buffer = NULL;      
+  
   int size = sizeof(struct ppm_pixel) * *w * *h;
   struct ppm_pixel* raster = malloc(size); // matrix
   if (raster == NULL) {
     printf("Could not create raster\n");
-    free(buffer);
-    fclose(file);
     return NULL;
   }
   
-  fgets(buffer, BUFFERSIZE, file); // maxval
-  //printf("%s\n", buffer);
-  memset(buffer, '\0', BUFFERSIZE);
-
-  //reading pixel matrix into raster
+  // reading pixel matrix into raster
   fread(raster, size, 1, file);
 
-  free(buffer);
-  buffer = NULL;      
   fclose(file);
+  file = NULL;
   return raster;
 }
 
@@ -71,58 +66,23 @@ h: height of corresponding image
 returns pointer to the matrix of pixels
 */
 void write_ppm(const char* filename, struct ppm_pixel* pxs, int w, int h) {
-  FILE* infile = fopen(filename, "rb");
-  if (infile == NULL) {
+  FILE* file = fopen(filename, "wb");
+  if (file == NULL) {
     printf("Cannot open file: %s\n", filename);
     exit(1);
   }
 
-  char* outfilename = malloc(sizeof(char)*(strlen(filename)+8));
-  for (int i=0; ((i < strlen(filename)) && (filename[i] != '.')); i++) {
-    outfilename[i] = filename[i];
-    if (filename[i+1] == '.') {
-      outfilename[i+1] = '\0';
-    }
-  }
-  strcat(outfilename, "-glitch.ppm");
-
-  FILE* outfile = fopen(outfilename, "wb");
-
-  char* buffer = malloc(sizeof(char) * BUFFERSIZE);
-  memset(buffer, '\0', BUFFERSIZE);
+  printf("Writing file %s\n", filename);
+  fprintf(file, "P6\n%d %d\n255\n", w, h);
   
-  // "magic number"
-  fgets(buffer+strlen(buffer), BUFFERSIZE-strlen(buffer), infile);  
-  //printf("%s\n", buffer); 
-
-  char* hashtag = buffer+strlen(buffer); 
-
-  // comment or width, height
-  fgets(buffer+strlen(buffer), BUFFERSIZE-strlen(buffer), infile);  
-  if (*hashtag == '#') {
-    //printf("%s\n", buffer); 
-    fgets(buffer+strlen(buffer), BUFFERSIZE-strlen(buffer), infile);   
+  if (pxs == NULL) {
+    printf("Pixel matrix to be written is empty!");
+    exit(1);
   }
-  //printf("%s\n", buffer);
-  sscanf(buffer+strlen(buffer), " %d %d ", &w, &h);
-
-  //maxval
-  fgets(buffer+strlen(buffer), BUFFERSIZE-strlen(buffer), infile); 
-  //printf("%s\n", buffer);
-
-  printf("Writing file %s\n", outfilename);
-  fwrite(buffer, sizeof(char)*strlen(buffer), 1, outfile);  
   
-  if (pxs != NULL) {
-    fwrite(pxs, sizeof(struct ppm_pixel) * w * h, 1, outfile);
-  }
+  // writing raster to file
+  fwrite(pxs, sizeof(struct ppm_pixel) * w * h, 1, file);
 
-  free(buffer);
-  free(outfilename);
-  fclose(infile);
-  fclose(outfile);  
-  buffer = NULL;
-  infile = NULL;
-  outfile = NULL;   
-  outfilename = NULL;
+  fclose(file);
+  file = NULL;
 }
