@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
       strcat(usage, " ");
     }
     printf("usage: %s\n", usage);
-    exit(1);
+    exit(0);
   }
   char* filename = argv[1];
   int w, h;
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
         else {
           bin[index % 8] = '0';
         }
-        // size of ASCII character
+        // size of typical ASCII character
         if ((index % 8) == 7) {
           decoded = bin_to_char(bin);
           //printf("bin: %s, decoded: %c\n", bin, decoded);
@@ -90,12 +90,12 @@ int main(int argc, char** argv) {
             //if (decoded == '\0') {
               //printf("\nNull char found\n");
             //}
-            printf("%s\n", message);
+            printf("%s", message);
             free(message);
             message = NULL; 
             free(raster);
             raster = NULL;
-            exit(1); //done
+            exit(2); // finished decoding
           }
           // append character to message
           else {
