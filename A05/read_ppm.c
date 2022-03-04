@@ -30,6 +30,12 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
   int headerlines = 3;
   while (headerlines > 0) {
     fgets(buffer, BUFFERSIZE, file);
+    if (headerlines == 3) {
+      if (strcmp(buffer, "P6\n") != 0) {
+	printf("File must be in binary format!\n");
+      	exit(0);
+      }	
+    }
     if (headerlines == 2) {
       sscanf(buffer, " %d %d ", w, h);
     }
@@ -49,7 +55,7 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
     return NULL;
   }
   
-  // reading pixel matrix into raster
+  //reading pixel matrix into raster
   fread(raster, size, 1, file);
 
   fclose(file);
@@ -76,8 +82,8 @@ void write_ppm(const char* filename, struct ppm_pixel* pxs, int w, int h) {
   fprintf(file, "P6\n%d %d\n255\n", w, h);
   
   if (pxs == NULL) {
-    printf("Pixel matrix to be written is empty!");
-    exit(1);
+    printf("Pixel matrix is empty!");
+    exit(2);
   }
   
   // writing raster to file

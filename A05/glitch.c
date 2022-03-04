@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
       strcat(usage, " ");
     }
     printf("usage: %s\n", usage);
-    exit(1);
+    exit(0);
   }
   char* filename = argv[1];
   int w, h;
