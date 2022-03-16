@@ -35,7 +35,7 @@ void play(char* word, char* progress, char* complete) {
       printf("Sorry, %c not found!\n", guess);
     }
     else if (strcmp(complete, progress) == 0) { // compare progress to end goal
-      printf("You won in %d turns!\n", i);
+      printf("\n%s\nYou won in %d turns!\n", progress, i);
       break; // end loop
     }
   }
