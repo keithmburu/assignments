@@ -32,6 +32,7 @@ int main() {
     printf("Cannot allocate new string. Exiting...\n");
     exit(1);
   } else {
+      memset(repeated, 0, (strlen(word) * count) + 1);
       repeat(word, count, repeated);
       free(repeated); // Freeing allocated heap space
       repeated = NULL;
