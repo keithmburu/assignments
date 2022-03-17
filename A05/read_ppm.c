@@ -32,7 +32,7 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
     fgets(buffer, BUFFERSIZE, file);
     if (headerlines == 3) {
       if (strcmp(buffer, "P6\n") != 0) {
-	printf("File must be in binary format!\n");
+      	printf("File must be in binary format!\n");
       	exit(0);
       }	
     }
