@@ -2,20 +2,47 @@
 
 Where did your run your tests? A laptop, or goldengate?
 
+    Laptop
 
 What are the performance specifications of the machine: number and speed of
 processors, size of RAM? (use `lscpu` and `free -m`)
 
+    CPU(s):                          8
+    Thread(s) per core:              2
+    Core(s) per socket:              4
+    Model name:                      Intel(R) Core(TM) i7-1065G7 CPU @ 1.30GHz
+
+              total        used        free      shared  buff/cache   available
+Mem:           7744         412        6694          21         637        7077
+Swap:          2048           0        2048
 
 = Allocations
 
 In `simple.c`, where does the increase in 1040 bytes come from?
 Why is the value 1040 bytes?
 
+  printf calls malloc for stdout memory allocation, malloc calls sbrk(1040), 
+  increasing brkp by 1040.
 
 How many bytes does `mylloc_list.c` allocate when the program ends? Explain why
 this amount makes sense.
 
+  1156 (0x484) bytes
+  1040 bytes are allocated by printf, and 116 bytes are allocated in the loop 
+  (100 bytes requested and a 16 byte chunk corresponding to two 4 byte ints and 
+  an 8 byte struct pointer). The memory allocated in one loop is freed 
+  before the next loop, so the same 116 bytes are used from the free list and 
+  no more memory is allocated.  
 
-= Fragementation
+= Fragmentation
 
+What is fragmentation? 
+
+  Inefficient memory allocation leading to wasted space.  
+
+What is the difference between internal and external fragmentation?
+
+  Internal fragmentation refers to unused space in used chunks.
+  External fragmentation refers to small unused chunks.
+
+Include your output in the README.adoc
