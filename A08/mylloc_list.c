@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define BESTFIT 1
+#define BESTFIT 0 // best fit strategy
 
 struct chunk {
   int size;
@@ -25,10 +25,12 @@ void* malloc (size_t size) {
   while (curr != NULL) {
     if (curr->size >= size) {
       if (BESTFIT && ((curr->size - size) < (bestsize-size))) {
+        // potential best chunk
         bestchunk = curr;
         bestchunkprev = prev;
         bestsize = curr->size;
       } else if (!BESTFIT) {
+        // first fit strategy
         if (prev != NULL) {
           prev->next = curr->next;
         } else {
@@ -42,6 +44,7 @@ void* malloc (size_t size) {
     curr = curr->next;
   }
   if (BESTFIT && bestchunk != NULL) {
+    // return best chunk
     if (bestchunkprev != NULL) {
       bestchunkprev->next = bestchunk->next;
     } else {
@@ -50,7 +53,7 @@ void* malloc (size_t size) {
     bestchunk->used = size;
     return (void*) (bestchunk+1);
   }
-  // Step 2: only allocate if none found
+  // Step 2: only allocate if memory not found in free list
   void *memory = sbrk(size + sizeof(struct chunk));
   if (memory == (void *) -1) {
     return NULL;
@@ -79,6 +82,7 @@ void fragstats(void* buffer[], int len) {
   int larg_unused = 0, small_unused = 99999, larg_free = 0, small_free = 99999;
   float avg_unused = 0.0, avg_free = 0.0; 
   for (int i=0; i < len; i++) {
+    // check buffer for used chunks with unused space
     if (buffer[i] != NULL) {
       struct chunk* data = (struct chunk*) buffer[i];
       struct chunk* header = data - 1;
@@ -92,7 +96,8 @@ void fragstats(void* buffer[], int len) {
       }
     }
   } 
-  struct chunk* curr = flist; 
+  struct chunk* curr = flist;
+  // check free list for unused chunks 
   while (curr != NULL) {
     n_free++;
     int free_i = curr->size;
