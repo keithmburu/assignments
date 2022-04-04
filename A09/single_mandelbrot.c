@@ -15,20 +15,14 @@ int main(int argc, char* argv[]) {
   int maxIterations = 1000;
 
   int opt;
-  int i = 0;
-  char usage[128] = "\0";
-  strcat(usage, argv[0]);
   while ((opt = getopt(argc, argv, ":s:l:r:t:b:")) != -1) {
-    i++;
-    strcat(usage, " ");
-    strcat(usage, argv[i]);
     switch (opt) {
       case 's': size = atoi(optarg); break;
       case 'l': xmin = atof(optarg); break;
       case 'r': xmax = atof(optarg); break;
       case 't': ymax = atof(optarg); break;
       case 'b': ymin = atof(optarg); break;
-      case '?': printf("usage: %s\n", usage); break;
+      case '?': printf("usage: %s -s <size> -l <xmin> -r <xmax> -b <ymin> -t <ymax>\n", argv[0]); break;
     }
   }
   printf("Generating mandelbrot with size %dx%d\n", size, size);
@@ -59,21 +53,23 @@ int main(int argc, char* argv[]) {
   // compute image
   for (int row = 0; row < size; row++) {
     for (int col = 0; col < size; col++) {
-      int xfrac = row / size;
-      int yfrac = col / size;
-      int x0 = xmin + xfrac * (xmax - xmin);
-      int y0 = ymin + yfrac * (ymax - ymin);
+      float xfrac = (float) (row+1) / size;
+      float yfrac = (float) (col+1) / size;
+      float x0 = xmin + xfrac * (xmax - xmin);
+      float y0 = ymin + yfrac * (ymax - ymin);
+      //printf("xfrac: %f yfrac: %f x0: %f y0: %f\n", xfrac, yfrac, x0, y0);
 
-      int x = 0;
-      int xtmp;
-      int y = 0;
+      float x = 0;
+      float xtmp;
+      float y = 0;
       int iter = 0;
       while ((iter < maxIterations) && ((x*x + y*y) < 4*4)) {
+        //printf("x*x + y*y = %g\n", x*x + y*y);
         xtmp = x*x - y*y + x0;
         y = 2*x*y + y0;
         x = xtmp;
         iter++;
-        printf("x: %d y: %d iter: %d\n", x, y, iter);
+        //printf("x: %d y: %d iter: %d\n", x, y, iter);
       }
       struct ppm_pixel color; 
       if (iter < maxIterations) { // escaped
