@@ -21,13 +21,13 @@ int main(int argc, char* argv[]) {
   int numProcesses = 4;
 
   int opt;
-  while ((opt = getopt(argc, argv, ":s:l:r:t:b:")) != -1) {
+  while ((opt = getopt(argc, argv, ":s:l:r:t:b:p:")) != -1) {
     switch (opt) {
       case 's': size = atoi(optarg); break;
       case 'l': xmin = atof(optarg); break;
       case 'r': xmax = atof(optarg); break;
-      case 't': ymax = atof(optarg); break;
-      case 'b': ymin = atof(optarg); break;
+      case 't': ymin = atof(optarg); break;
+      case 'b': ymax = atof(optarg); break;
       case 'p': numProcesses = atoi(optarg); break;
       case '?': printf("usage: %s -s <size> -l <xmin> -r <xmax> "
         "-b <ymin> -t <ymax> -p <numProcesses>\n", argv[0]); break;
@@ -38,16 +38,23 @@ int main(int argc, char* argv[]) {
   printf("  X range = [%.4f,%.4f]\n", xmin, xmax);
   printf("  Y range = [%.4f,%.4f]\n", ymin, ymax);
 
-  // todo: your work here
-  struct ppm_pixel* raster = malloc(sizeof(struct ppm_pixel) * size * size);
-  memset(raster, 0, (sizeof(struct ppm_pixel) * size * size));
+  // set up image in shared memory
+  int shmid = shmget(IPC_PRIVATE, sizeof(struct ppm_pixel)*size*size, 0644|IPC_CREAT);
+  if (shmid == -1) {
+    perror("Shared memory");
+    return 1;
+  }
+  struct ppm_pixel* raster = shmat(shmid, NULL, 0);
+  if (raster == (void*) -1) {
+    perror("Shared memory attach");
+    return 1;
+  }
 
   struct timeval tstart, tend;
   double timer;
-
   srand(time(0));
-
   gettimeofday(&tstart, NULL);
+
   // generate pallet
   struct ppm_pixel* palette = malloc(maxIterations * sizeof(struct ppm_pixel));
   memset(palette, 0, maxIterations * sizeof(struct ppm_pixel));
@@ -67,6 +74,7 @@ int main(int argc, char* argv[]) {
   int rowend = size/sqrt(numProcesses);
   int colstart = 0;
   int colend = size/sqrt(numProcesses);
+  // matrix keeping track of process allocations
   int** rowscols = malloc(sizeof(int*) * numProcesses);
   for (int i = 0; i < numProcesses; i++) {
     rowscols[i] = malloc(sizeof(int) * 4); 
@@ -104,11 +112,19 @@ int main(int argc, char* argv[]) {
           printf("Child process complete: %d\n", pids[i]);
         }
         gettimeofday(&tend, NULL);
-        timer = tend.tv_sec - tstart.tv_sec + (tend.tv_usec - tstart.tv_usec)/1.e6;
-        printf("Computed mandelbrot set (%dx%d) in %.6g seconds\n", size, size, timer);
+        timer = tend.tv_sec - tstart.tv_sec + (tend.tv_usec - tstart.tv_usec) \
+          /1.e6;
+        printf("Computed mandelbrot set (%dx%d) in %.6g seconds\n", size, size,\
+          timer);
         char filename[32];
         sprintf(filename, "multi-mandelbrot-%d-%ld.ppm", size, time(0));
         write_ppm(filename, raster, size, size);
+        free(pids);
+        free(palette);
+        free(rowscols);
+        if (shmdt(raster) == -1) {
+          perror("Detach");
+        }
         exit(0);
       }
     }
@@ -121,12 +137,11 @@ int main(int argc, char* argv[]) {
       float x0 = xmin + xfrac * (xmax - xmin);
       float y0 = ymin + yfrac * (ymax - ymin);
       //printf("xfrac: %f yfrac: %f x0: %f y0: %f\n", xfrac, yfrac, x0, y0);
-
       float x = 0;
       float xtmp;
       float y = 0;
       int iter = 0;
-      while ((iter < maxIterations) && ((x*x + y*y) < 4*4)) {
+      while ((iter < maxIterations) && ((x*x + y*y) < 2*2)) {
         xtmp = x*x - y*y + x0;
         y = 2*x*y + y0;
         x = xtmp;
@@ -143,6 +158,9 @@ int main(int argc, char* argv[]) {
       // write color to image at location (row,col)
       raster[(row*size)+col] = color;
     }
+  }
+  if (shmdt(raster) == -1) {
+    perror("Shared memory detach");
   }
   return 0;
 }

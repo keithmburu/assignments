@@ -20,25 +20,25 @@ int main(int argc, char* argv[]) {
       case 's': size = atoi(optarg); break;
       case 'l': xmin = atof(optarg); break;
       case 'r': xmax = atof(optarg); break;
-      case 't': ymax = atof(optarg); break;
-      case 'b': ymin = atof(optarg); break;
-      case '?': printf("usage: %s -s <size> -l <xmin> -r <xmax> -b <ymin> -t <ymax>\n", argv[0]); break;
+      case 't': ymin = atof(optarg); break;
+      case 'b': ymax = atof(optarg); break;
+      case '?': printf("usage: %s -s <size> -l <xmin> -r <xmax> -b <ymin> -t 
+                <ymax>\n", argv[0]); break;
     }
   }
   printf("Generating mandelbrot with size %dx%d\n", size, size);
   printf("  X range = [%.4f,%.4f]\n", xmin, xmax);
   printf("  Y range = [%.4f,%.4f]\n", ymin, ymax);
 
-  // todo: your work here
+  // setup for image 
   struct ppm_pixel* raster = malloc(sizeof(struct ppm_pixel) * size * size);
   memset(raster, 0, (sizeof(struct ppm_pixel) * size * size));
 
   struct timeval tstart, tend;
   double timer;
-
   srand(time(0));
-
   gettimeofday(&tstart, NULL); 
+
   // generate pallet
   struct ppm_pixel* palette = malloc(maxIterations * sizeof(struct ppm_pixel));
   memset(palette, 0, maxIterations * sizeof(struct ppm_pixel));
@@ -58,12 +58,11 @@ int main(int argc, char* argv[]) {
       float x0 = xmin + xfrac * (xmax - xmin);
       float y0 = ymin + yfrac * (ymax - ymin);
       //printf("xfrac: %f yfrac: %f x0: %f y0: %f\n", xfrac, yfrac, x0, y0);
-
       float x = 0;
       float xtmp;
       float y = 0;
       int iter = 0;
-      while ((iter < maxIterations) && ((x*x + y*y) < 4*4)) {
+      while ((iter < maxIterations) && ((x*x + y*y) < 2*2)) {
         //printf("x*x + y*y = %g\n", x*x + y*y);
         xtmp = x*x - y*y + x0;
         y = 2*x*y + y0;
