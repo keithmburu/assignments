@@ -84,9 +84,9 @@ void fragstats(void* buffer[], int len) {
   for (int i=0; i < len; i++) {
     // check buffer for used chunks with unused space
     if (buffer[i] != NULL) {
+      n_used++;
       struct chunk* data = (struct chunk*) buffer[i];
       struct chunk* header = data - 1;
-      n_used++;
       int unused_i = header->size - header->used;
       unused += unused_i;
       if (unused_i > larg_unused) {
@@ -107,7 +107,7 @@ void fragstats(void* buffer[], int len) {
     } else if (free_i < small_free) {
       small_free = free_i;
     }
-  curr = curr->next;
+    curr = curr->next;
   }
   if (n_free != 0) {
     avg_free = (float) free/n_free;
