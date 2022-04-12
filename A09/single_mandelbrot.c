@@ -22,8 +22,8 @@ int main(int argc, char* argv[]) {
       case 'r': xmax = atof(optarg); break;
       case 't': ymin = atof(optarg); break;
       case 'b': ymax = atof(optarg); break;
-      case '?': printf("usage: %s -s <size> -l <xmin> -r <xmax> -b <ymin> -t 
-                <ymax>\n", argv[0]); break;
+      case '?': printf("usage: %s -s <size> -l <xmin> -r <xmax> -b <ymin> -t " 
+                "<ymax>\n", argv[0]); break;
     }
   }
   printf("Generating mandelbrot with size %dx%d\n", size, size);
@@ -51,10 +51,10 @@ int main(int argc, char* argv[]) {
   }
   struct ppm_pixel black = {{{0, 0, 0}}};
   // compute image
-  for (int row = 0; row < size; row++) {
-    for (int col = 0; col < size; col++) {
-      float xfrac = (float) (row+1) / size;
-      float yfrac = (float) (col+1) / size;
+  for (int col = 0; col < size; col++) {
+    for (int row = 0; row < size; row++) {
+      float xfrac = (float) (col+1) / size;
+      float yfrac = (float) (row+1) / size;
       float x0 = xmin + xfrac * (xmax - xmin);
       float y0 = ymin + yfrac * (ymax - ymin);
       //printf("xfrac: %f yfrac: %f x0: %f y0: %f\n", xfrac, yfrac, x0, y0);
@@ -89,4 +89,6 @@ int main(int argc, char* argv[]) {
   char filename[32];
   sprintf(filename, "mandelbrot-%d-%ld.ppm", size, time(0));
   write_ppm(filename, raster, size, size);
+  free(palette);
+  free(raster);
 }
