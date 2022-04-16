@@ -1,3 +1,9 @@
+/*
+single_mandelbrot.c
+Author: Keith Mburu
+4/8/2022
+Generates the mandelbrot set
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

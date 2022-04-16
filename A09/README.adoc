@@ -39,9 +39,9 @@ the amount of time it takes to compute each image.
 [cols="1,1"]
 !===
 | Size | Time (s) 
-| 100 | todo
-| 400 | todo
-| 800 | todo
-| 1000 | todo
-| 2000 | todo
+| 100 | 0.049279
+| 400 | 0.356498
+| 800 | 1.34614
+| 1000 | 1.47922
+| 2000 | 5.87303
 !===

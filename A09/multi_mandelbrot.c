@@ -1,3 +1,9 @@
+/*
+multi_mandelbrot.c
+Author: Keith Mburu
+4/15/2022
+Generates the mandelbrot set using multiple processes
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -50,6 +56,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  // timer
   struct timeval tstart, tend;
   double timer;
   srand(time(0));
@@ -74,8 +81,9 @@ int main(int argc, char* argv[]) {
   int rowend = size/sqrt(numProcesses);
   int colstart = 0;
   int colend = size/sqrt(numProcesses);
-  // matrix keeping track of process allocations
+  // matrix keeping track of process delegation
   int** rowscols = malloc(sizeof(int*) * numProcesses);
+  
   for (int i = 0; i < numProcesses; i++) {
     rowscols[i] = malloc(sizeof(int) * 4); 
     rowscols[i][0] = rowstart;                             
@@ -120,20 +128,24 @@ int main(int argc, char* argv[]) {
         sprintf(filename, "multi-mandelbrot-%d-%ld.ppm", size, time(0));
         write_ppm(filename, raster, size, size);
         free(pids);
+        for (int i = 0; i < numProcesses; i++) {
+          free(rowscols[i]);
+        }
         free(palette);
         free(rowscols);
         if (shmdt(raster) == -1) {
           perror("Detach");
         }
-        exit(0);
+        // parent done
+        return 0;
       }
     }
   }
   // compute image
-  for (int row = rowstart; row < rowend; row++) {
-    for (int col = colstart; col < colend; col++) {
-      float xfrac = (float) (row+1) / size;
-      float yfrac = (float) (col+1) / size;
+  for (int col = colstart; col < colend; col++) {
+    for (int row = rowstart; row < rowend; row++) {
+      float xfrac = (float) (col+1) / size;
+      float yfrac = (float) (row+1) / size;
       float x0 = xmin + xfrac * (xmax - xmin);
       float y0 = ymin + yfrac * (ymax - ymin);
       //printf("xfrac: %f yfrac: %f x0: %f y0: %f\n", xfrac, yfrac, x0, y0);
@@ -159,8 +171,15 @@ int main(int argc, char* argv[]) {
       raster[(row*size)+col] = color;
     }
   }
+  free(pids);
+  free(palette);
+  for (int i = 0; i < numProcesses; i++) {
+    free(rowscols[i]);
+  }
+  free(rowscols);
   if (shmdt(raster) == -1) {
     perror("Shared memory detach");
   }
+  // child done
   return 0;
 }
