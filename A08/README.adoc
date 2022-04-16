@@ -21,18 +21,19 @@ Swap:          2048           0        2048
 In `simple.c`, where does the increase in 1040 bytes come from?
 Why is the value 1040 bytes?
 
-  printf calls malloc for stdout memory allocation, malloc calls sbrk(1040), 
-  increasing brkp by 1040.
+  1024 bytes is allocated for printf buffer, along with a 16 byte chunk header
+  corresponding to two 4 byte ints and one 8 byte struct pointer, for a total 
+  of 1040 bytes allocated.
 
 How many bytes does `mylloc_list.c` allocate when the program ends? Explain why
 this amount makes sense.
 
   1156 (0x484) bytes
-  1040 bytes are allocated by printf, and 116 bytes are allocated in the loop 
-  (100 bytes requested and a 16 byte chunk corresponding to two 4 byte ints and 
-  one 8 byte struct pointer). The memory allocated in one loop is freed 
-  before the next loop, so the same 116 bytes are used over and over from the
-  free list and no more memory is allocated throughout the program.  
+  1040 bytes are allocated during printf, and 116 bytes are allocated in each 
+  loop (100 bytes requested and a 16 byte chunk header). The memory allocated in
+  one loop is freed before the next loop, so the same 116 bytes are used over 
+  and over from the free list and no more memory is allocated throughout the 
+  program.  
 
 = Fragmentation
 
@@ -43,7 +44,8 @@ What is fragmentation?
 What is the difference between internal and external fragmentation?
 
   Internal fragmentation refers to unused space in used chunks.
-  External fragmentation refers to unused chunks that are too small to be used.
+  External fragmentation refers to unused chunks that are small and not 
+  contiguous.
 
 Include your output in the README.adoc
 
