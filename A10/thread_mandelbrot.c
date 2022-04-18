@@ -127,6 +127,10 @@ int main(int argc, char* argv[]) {
   struct ppm_pixel black = {{{0, 0, 0}}};
 
   pthread_t* tids = malloc(sizeof(pthread_t) * numThreads);
+  if (palette == NULL) {
+    printf("tids malloc failed\n");
+    exit(1);
+  }
   memset(tids, 0, sizeof(pthread_t) * numThreads);
 
   int rowstart = 0;
@@ -174,7 +178,7 @@ int main(int argc, char* argv[]) {
   printf("Computed mandelbrot set (%dx%d) in %.6g seconds\n", size, size,\
     timer);
   char filename[32];
-  sprintf(filename, "multi-mandelbrot-%d-%ld.ppm", size, time(0));
+  sprintf(filename, "mandelbrot-%d-%ld.ppm", size, time(0));
   write_ppm(filename, raster, size, size);
   free(tids);
   free(palette);
