@@ -29,6 +29,7 @@ struct threadData {
   float ymin;
   float ymax;
   int maxIterations;
+  pthread_mutex_t* mutex;
 };
   
 void mandelbrot(void* threadData_i) {
@@ -60,13 +61,13 @@ void mandelbrot(void* threadData_i) {
         struct ppm_pixel black = {{{0, 0, 0}}};
         color = black;
       }
+      pthread_mutex_lock(data->mutex);
       // write color to image at location (row,col)
       (data->raster)[(row*(data->size))+col] = color;
+      pthread_mutex_unlock(data->mutex);
     }
   }
   printf("Thread %d) finished\n", data->id);
-  free(data);
-  data = NULL;
 }
 
 int main(int argc, char* argv[]) {
@@ -96,7 +97,6 @@ int main(int argc, char* argv[]) {
   printf("  X range = [%.4f,%.4f]\n", xmin, xmax);
   printf("  Y range = [%.4f,%.4f]\n", ymin, ymax);
 
-  // set up image in shared memory
   struct ppm_pixel* raster = malloc(sizeof(struct ppm_pixel)*size*size);
   if (raster == NULL) {
     printf("raster malloc failed\n");
@@ -137,26 +137,20 @@ int main(int argc, char* argv[]) {
   int rowend = size/sqrt(numThreads);
   int colstart = 0;
   int colend = size/sqrt(numThreads); 
-  struct threadData* threadData_i = malloc(sizeof(struct threadData));
-  threadData_i->raster = raster;
-  threadData_i->palette = palette;
-  threadData_i->size = size;
-  threadData_i->xmin = xmin;
-  threadData_i->xmax = xmax;
-  threadData_i->ymin = ymin;
-  threadData_i->ymax = ymax;
-  threadData_i->maxIterations = maxIterations;
-  for (int i = 1; i <= numThreads; i++) {
+  pthread_mutex_t mutex;
+  pthread_mutex_init(&mutex, NULL);
+  struct threadData* dataArr = malloc(sizeof(struct threadData)*numThreads);
+  memset(dataArr, 0, sizeof(struct threadData)*numThreads);
+  for (int i = 0; i < numThreads; i++) {
     pthread_t thread_i;
     tids[i] = thread_i; 
-    threadData_i->id = i;
-    threadData_i->rowstart = rowstart;
-    threadData_i->rowend = rowend;
-    threadData_i->colstart = colstart;
-    threadData_i->colend = colend;
-    printf("Thread %d) Sub-image block: cols (%d, %d) to rows (%d,%d)\n", i, \
+    int id = i+1;
+    struct threadData threadData_i = {id, rowstart, rowend, colstart, colend,
+      raster, palette, size, xmin, xmax, ymin, ymax, maxIterations, &mutex};
+    dataArr[i] = threadData_i;
+    printf("Thread %d) Sub-image block: cols (%d, %d) to rows (%d,%d)\n", id, \
       rowstart, rowend, colstart, colend);
-    pthread_create(&thread_i, NULL, (void*) mandelbrot, (void*) threadData_i);
+    pthread_create(&thread_i, NULL, (void*) mandelbrot, (void*) &dataArr[i]);
     if (i == sqrt(numThreads)-1) {
       colstart += size/sqrt(numThreads);
       colend += size/sqrt(numThreads);
@@ -171,6 +165,7 @@ int main(int argc, char* argv[]) {
   for (int i = 1; i <= numThreads; i++) {
     pthread_join(tids[i], NULL);
   }
+  pthread_mutex_destroy(&mutex);
   
   gettimeofday(&tend, NULL);
   timer = tend.tv_sec - tstart.tv_sec + (tend.tv_usec - tstart.tv_usec) \
