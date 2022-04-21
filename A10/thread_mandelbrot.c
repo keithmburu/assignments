@@ -31,12 +31,12 @@ struct threadData {
   int maxIterations;
   pthread_mutex_t* mutex;
 };
-  
+
 void mandelbrot(void* threadData_i) {
   struct threadData* data = (struct threadData*) threadData_i;
   // compute image
-  for (int col = data->colstart; col < data->colend; col++) {
-    for (int row = data->rowstart; row < data->rowend; row++) {
+  for (int row = data->rowstart; row < data->rowend; row++) {
+    for (int col = data->colstart; col < data->colend; col++) {
       float xfrac = (float) (col+1) / data->size;
       float yfrac = (float) (row+1) / data->size;
       float x0 = data->xmin + xfrac * (data->xmax - data->xmin);
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
   struct ppm_pixel black = {{{0, 0, 0}}};
 
   pthread_t* tids = malloc(sizeof(pthread_t) * numThreads);
-  if (palette == NULL) {
+  if (tids == NULL) {
     printf("tids malloc failed\n");
     exit(1);
   }
@@ -141,28 +141,26 @@ int main(int argc, char* argv[]) {
   pthread_mutex_init(&mutex, NULL);
   struct threadData* dataArr = malloc(sizeof(struct threadData)*numThreads);
   memset(dataArr, 0, sizeof(struct threadData)*numThreads);
-  for (int i = 0; i < numThreads; i++) {
-    pthread_t thread_i;
-    tids[i] = thread_i; 
+  for (int i = 0; i < numThreads; i++) { 
     int id = i+1;
     struct threadData threadData_i = {id, rowstart, rowend, colstart, colend,
       raster, palette, size, xmin, xmax, ymin, ymax, maxIterations, &mutex};
     dataArr[i] = threadData_i;
     printf("Thread %d) Sub-image block: cols (%d, %d) to rows (%d,%d)\n", id, \
       rowstart, rowend, colstart, colend);
-    pthread_create(&thread_i, NULL, (void*) mandelbrot, (void*) &dataArr[i]);
+    pthread_create(&tids[i], NULL, (void*) mandelbrot, (void*) &dataArr[i]);
     if (i == sqrt(numThreads)-1) {
-      colstart += size/sqrt(numThreads);
-      colend += size/sqrt(numThreads);
-      rowstart = 0;
-      rowend = size/sqrt(numThreads);
-    } else {
       rowstart += size/sqrt(numThreads);
       rowend += size/sqrt(numThreads);
+      colstart = 0;
+      colend = size/sqrt(numThreads);
+    } else {
+      colstart += size/sqrt(numThreads);
+      colend += size/sqrt(numThreads);
     }
   }
 
-  for (int i = 1; i <= numThreads; i++) {
+  for (int i = 0; i < numThreads; i++) {
     pthread_join(tids[i], NULL);
   }
   pthread_mutex_destroy(&mutex);
@@ -176,7 +174,9 @@ int main(int argc, char* argv[]) {
   sprintf(filename, "mandelbrot-%d-%ld.ppm", size, time(0));
   write_ppm(filename, raster, size, size);
   free(tids);
+  tids = NULL;
   free(palette);
   free(raster);
+  free(dataArr);
   return 0;
 }

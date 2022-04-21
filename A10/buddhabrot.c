@@ -134,6 +134,7 @@ void run(void* threadData_i) {
   struct threadData* data = (struct threadData*) threadData_i;
   mandelbrot(data);
   counts(data);
+  // wait until all counts are computed
   pthread_barrier_wait(data->barrier);
   colors(data);
 }
@@ -225,8 +226,6 @@ int main(int argc, char* argv[]) {
   struct threadData* dataArr = malloc(sizeof(struct threadData)*numThreads);
   memset(dataArr, 0, sizeof(struct threadData)*numThreads);
   for (int i = 0; i < numThreads; i++) {
-    pthread_t thread_i;
-    tids[i] = thread_i; 
     int id = i+1;
     struct threadData threadData_i = {id, rowstart, rowend, colstart, colend, 
       raster, palette, size, xmin, xmax, ymin, ymax, maxIterations, &mutex, \
@@ -234,7 +233,7 @@ int main(int argc, char* argv[]) {
     dataArr[i] = threadData_i;
     printf("Thread %d) Sub-image block: cols (%d, %d) to rows (%d,%d)\n", id, \
       rowstart, rowend, colstart, colend);
-    pthread_create(&thread_i, NULL, (void*) run, (void*) &dataArr[i]);
+    pthread_create(&tids[i], NULL, (void*) run, (void*) &dataArr[i]);
     if (i == sqrt(numThreads)-1) {
       rowstart += size/sqrt(numThreads);
       rowend += size/sqrt(numThreads);
@@ -246,7 +245,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  for (int i = 1; i <= numThreads; i++) {
+  for (int i = 0; i < numThreads; i++) {
     pthread_join(tids[i], NULL);
   }
   pthread_mutex_destroy(&mutex);  
@@ -261,9 +260,11 @@ int main(int argc, char* argv[]) {
   sprintf(filename, "buddhabrot-%d-%ld.ppm", size, time(0));
   write_ppm(filename, raster, size, size);
   free(counts);
+  free(maxCount);
   free(membership);
   free(tids);
   free(palette);
   free(raster);
+  free(dataArr);
   return 0;
 }
