@@ -1,8 +1,8 @@
 /*
-thread_mandelbrot.c
+buddhabrot.c
 Author: Keith Mburu
 4/22/2022
-Generates the mandelbrot set using multiple threads
+Generates the buddhabrot set using multiple threads
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,16 +29,16 @@ struct threadData {
   float ymin;
   float ymax;
   int maxIterations;
+  pthread_mutex_t* mutex;
+  pthread_barrier_t* barrier;
   int* membership;
-  int maxCount;
   int* counts;
+  int* maxCount;
 };
-  
-pthread_mutex_t mutex;
- 
+   
 void mandelbrot(struct threadData* data) {
-  for (int col = data->colstart; col < data->colend; col++) {
-    for (int row = data->rowstart; row < data->rowend; row++) {
+  for (int row = data->rowstart; row < data->rowend; row++) {
+    for (int col = data->colstart; col < data->colend; col++) {
       float xfrac = (float) (col+1) / data->size;
       float yfrac = (float) (row+1) / data->size;
       float x0 = data->xmin + xfrac * (data->xmax - data->xmin);
@@ -55,19 +55,22 @@ void mandelbrot(struct threadData* data) {
         iter++;
         //printf("x: %d y: %d iter: %d\n", x, y, iter);
       }
+      
+      pthread_mutex_lock(data->mutex);
       if (iter < data->maxIterations) { // escaped
-        data->membership[(row*data->size)+col] = 0;
+        data->membership[(row*(data->size))+col] = 0;
       } else {
-        data->membership[(row*data->size)+col] = 1;
+        data->membership[(row*(data->size))+col] = 1;
       }
+      pthread_mutex_unlock(data->mutex);
     }
   }
   printf("Thread %d) finished mandelbrot\n", data->id);
 }
 
 void counts(struct threadData* data) {
-  for (int col = data->colstart; col < data->colend; col++) {
-    for (int row = data->rowstart; row < data->rowend; row++) {
+  for (int row = data->rowstart; row < data->rowend; row++) {
+    for (int col = data->colstart; col < data->colend; col++) {
       if (data->membership[(row*data->size)+col] == 1) continue; //in mandelbrot
       float xfrac = (float) (col+1) / data->size;
       float yfrac = (float) (row+1) / data->size;
@@ -77,55 +80,61 @@ void counts(struct threadData* data) {
       float x = 0;
       float xtmp;
       float y = 0;
-      int iter = 0;
-      while ((iter < data->maxIterations) && ((x*x + y*y) < 2*2)) {
+      while ((x*x + y*y) < 2*2) {
         xtmp = x*x - y*y + x0;
         y = 2*x*y + y0;
         x = xtmp;
         //printf("x: %d y: %d iter: %d\n", x, y, iter);
-        int yrow = round(data->size * (y - data->ymin)/(data->ymax - data->ymax));
-        int xcol = round(data->size * (x - data->xmin)/(data->xmax - data->xmax));
+        int yrow = round(data->size * (y - data->ymin)/(data->ymax - data->ymin));
+        int xcol = round(data->size * (x - data->xmin)/(data->xmax - data->xmin));
         if (yrow < 0 || yrow >= data->size) continue; // out of range
         if (xcol < 0 || xcol >= data->size) continue; // out of range
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(data->mutex);
         data->counts[(yrow*data->size)+xcol]++;
-        pthread_mutex_unlock(&mutex);
-        data->maxCount++;
-        iter++;
+        if (data->counts[(yrow*data->size)+xcol] > *(data->maxCount)) {
+          *(data->maxCount) = data->counts[(yrow*data->size)+xcol];
+        }
+        pthread_mutex_unlock(data->mutex);
+        //printf("uncounted\n");
       }
     }
   }
   printf("Thread %d) finished counts\n", data->id);
-  free(data->membership);
-  data->membership = NULL;
 }
 
 void colors(struct threadData* data) {
   float gamma = 0.681;
   float factor = 1.0/gamma;
-  for (int col = data->colstart; col < data->colend; col++) {
-    for (int row = data->rowstart; row < data->rowend; row++) {
-      int value = 0;
+  for (int row = data->rowstart; row < data->rowend; row++) {
+    for (int col = data->colstart; col < data->colend; col++) {
+      float value = 0.0;
+      //printf("%d\n", row*data->size+col);
+      //printf("%d\n\n", data->counts[(row*data->size)+col]); 
       if (data->counts[(row*data->size)+col] > 0) {
-        value = log(data->counts[(row*data->size)+col]) / log(data->maxCount);
-        value = pow(value, factor);
-        struct ppm_pixel color;
-        color.red = value * 255;
-        color.green = value * 255;
-        color.blue = value * 255;
-        (data->raster)[(row*(data->size))+col] = color;
+        value = (float) log(data->counts[(row*data->size)+col]) / log(*(data->maxCount));
+        value = (float) pow(value, factor);
+        //printf("value: %f\n", value);
       }
+      struct ppm_pixel color;
+      color.red = value * 255;
+      color.green = value * 255;
+      color.blue = value * 255;
+      pthread_mutex_lock(data->mutex);
+      //printf("r: %d g: %d b: %d\n", color.red, color.green, color.blue);
+      // write color to image at location (row,col)
+      data->raster[(row*(data->size))+col] = color;
+      pthread_mutex_unlock(data->mutex);
     }
   }
   printf("Thread %d) finished colors\n", data->id);
-  free(data->counts);
-  data->counts = NULL;
 }
 
+// thread routine
 void run(void* threadData_i) {
   struct threadData* data = (struct threadData*) threadData_i;
   mandelbrot(data);
   counts(data);
+  pthread_barrier_wait(data->barrier);
   colors(data);
 }
 
@@ -155,8 +164,7 @@ int main(int argc, char* argv[]) {
   printf("  Num threads = %d\n", numThreads);
   printf("  X range = [%.4f,%.4f]\n", xmin, xmax);
   printf("  Y range = [%.4f,%.4f]\n", ymin, ymax);
-
-  // set up image in shared memory
+ 
   struct ppm_pixel* raster = malloc(sizeof(struct ppm_pixel)*size*size);
   if (raster == NULL) {
     printf("raster malloc failed\n");
@@ -170,7 +178,6 @@ int main(int argc, char* argv[]) {
   srand(time(0));
   gettimeofday(&tstart, NULL);
 
-  // generate pallet
   struct ppm_pixel* palette = malloc(maxIterations * sizeof(struct ppm_pixel));
   if (palette == NULL) {
     printf("palette malloc failed\n");
@@ -197,56 +204,54 @@ int main(int argc, char* argv[]) {
   int rowend = size/sqrt(numThreads);
   int colstart = 0;
   int colend = size/sqrt(numThreads); 
-  struct threadData* threadData_i = malloc(sizeof(struct threadData));
-  threadData_i->raster = raster;
-  threadData_i->palette = palette;
-  threadData_i->size = size;
-  threadData_i->xmin = xmin;
-  threadData_i->xmax = xmax;
-  threadData_i->ymin = ymin;
-  threadData_i->ymax = ymax;
-  threadData_i->maxIterations = maxIterations;
+  pthread_mutex_t mutex;
+  pthread_mutex_init(&mutex, NULL);
+  pthread_barrier_t barrier;
+  pthread_barrier_init(&barrier, NULL, numThreads);
   int* membership = malloc(sizeof(int)*size*size);
   if (membership == NULL) {
     printf("membership malloc failed\n");
     exit(1);
   }
   memset(membership, 0, sizeof(int)*size*size);
-  threadData_i->membership = membership;
-  threadData_i->maxCount = 0;
+  int* maxCount = malloc(sizeof(int));
+  *maxCount = 0;
   int* counts = malloc(sizeof(int)*size*size);
   if (counts == NULL) {
     printf("counts malloc failed\n");
     exit(1);
   }
   memset(counts, 0, sizeof(int)*size*size);
-  threadData_i->counts = counts;
-  for (int i = 1; i <= numThreads; i++) {
+  struct threadData* dataArr = malloc(sizeof(struct threadData)*numThreads);
+  memset(dataArr, 0, sizeof(struct threadData)*numThreads);
+  for (int i = 0; i < numThreads; i++) {
     pthread_t thread_i;
     tids[i] = thread_i; 
-    threadData_i->id = i;
-    threadData_i->rowstart = rowstart;
-    threadData_i->rowend = rowend;
-    threadData_i->colstart = colstart;
-    threadData_i->colend = colend;
-    printf("Thread %d) Sub-image block: cols (%d, %d) to rows (%d,%d)\n", i, \
+    int id = i+1;
+    struct threadData threadData_i = {id, rowstart, rowend, colstart, colend, 
+      raster, palette, size, xmin, xmax, ymin, ymax, maxIterations, &mutex, \
+      &barrier, membership, counts, maxCount};
+    dataArr[i] = threadData_i;
+    printf("Thread %d) Sub-image block: cols (%d, %d) to rows (%d,%d)\n", id, \
       rowstart, rowend, colstart, colend);
-    pthread_create(&thread_i, NULL, (void*) run, (void*) threadData_i);
+    pthread_create(&thread_i, NULL, (void*) run, (void*) &dataArr[i]);
     if (i == sqrt(numThreads)-1) {
-      colstart += size/sqrt(numThreads);
-      colend += size/sqrt(numThreads);
-      rowstart = 0;
-      rowend = size/sqrt(numThreads);
-    } else {
       rowstart += size/sqrt(numThreads);
       rowend += size/sqrt(numThreads);
+      colstart = 0;
+      colend = size/sqrt(numThreads);
+    } else {
+      colstart += size/sqrt(numThreads);
+      colend += size/sqrt(numThreads);
     }
   }
 
   for (int i = 1; i <= numThreads; i++) {
     pthread_join(tids[i], NULL);
   }
-  
+  pthread_mutex_destroy(&mutex);  
+  pthread_barrier_destroy(&barrier);  
+
   gettimeofday(&tend, NULL);
   timer = tend.tv_sec - tstart.tv_sec + (tend.tv_usec - tstart.tv_usec) \
     /1.e6;
@@ -255,6 +260,8 @@ int main(int argc, char* argv[]) {
   char filename[32];
   sprintf(filename, "buddhabrot-%d-%ld.ppm", size, time(0));
   write_ppm(filename, raster, size, size);
+  free(counts);
+  free(membership);
   free(tids);
   free(palette);
   free(raster);
