@@ -134,7 +134,10 @@ int main(int argc, char* argv[]) {
         free(palette);
         free(rowscols);
         if (shmdt(raster) == -1) {
-          perror("Detach");
+          perror("Shared memory detach");
+        }
+        if (shmctl(shmid, IPC_RMID, 0) == -1) {
+          perror("Shared memory delete");
         }
         // parent done
         return 0;
